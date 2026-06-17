@@ -1,6 +1,31 @@
 # PTCG_Agent
 Build an AI Training Agent to play the Pokémon Trading Card Game.
 
+## Project Setup
+
+Install dependencies for local development and analysis:
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+## Local Evaluation & Testing
+
+You can evaluate your agent's decision-making locally by simulating games against a random player.
+
+### Running the Evaluation Benchmark
+To run 10 matches swapping going first and second and output the final win rate:
+
+```bash
+python scripts/evaluate.py
+```
+
+*Note: This benchmark executes inside the simulation environment, feeding observations to your agent (`submission/main.py`) and passing actions back to the engine.*
+
+---
+
 ## Deck Validation Tests
 
 Whenever you add a new deck CSV file in the `decks/` folder, you can run the dynamic deck validation tests to ensure the deck matches the game's submission rules.
