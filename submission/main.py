@@ -2,8 +2,15 @@ import os
 import sys
 import re
 
+try:
+    AGENT_DIR = os.path.dirname(os.path.abspath(__file__))
+except NameError:
+    AGENT_DIR = "/kaggle_simulations/agent"
+    if not os.path.exists(AGENT_DIR):
+        AGENT_DIR = os.getcwd()
+
 # Append cg to path to import SDK
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(AGENT_DIR)
 
 from cg.api import Observation, to_observation_class, OptionType, SelectContext, AreaType, all_attack
 from card_database import CardDatabase
@@ -20,7 +27,7 @@ def read_deck_csv() -> list[int]:
     if not os.path.exists(file_path):
         file_path = os.path.join("/kaggle_simulations/agent/", file_path)
     if not os.path.exists(file_path):
-        file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "deck.csv")
+        file_path = os.path.join(AGENT_DIR, "deck.csv")
         
     deck = []
     with open(file_path, "r") as file:
