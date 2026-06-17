@@ -1,14 +1,6 @@
 # PTCG_Agent
 Build an AI Training Agent to play the Pokémon Trading Card Game.
 
-## Project Setup
-
-Install the basic dependencies for parsing card data and running validation tools locally:
-
-```bash
-pip install -r requirements.txt
-```
-
 ## Deck Validation Tests
 
 Whenever you add a new deck CSV file in the `decks/` folder, you can run the dynamic deck validation tests to ensure the deck matches the game's submission rules.
