@@ -6,7 +6,6 @@ class CardDatabase:
     
     def __init__(self, csv_path=None):
         if csv_path is None:
-            # Check local directory first (for Kaggle packaging)
             try:
                 current_dir = os.path.dirname(os.path.abspath(__file__))
             except NameError:
@@ -14,12 +13,21 @@ class CardDatabase:
                 if not os.path.exists(current_dir):
                     current_dir = os.getcwd()
             
-            local_path = os.path.join(current_dir, "EN_Card_Data.csv")
-            if os.path.exists(local_path):
-                csv_path = local_path
-            else:
-                base_dir = os.path.dirname(os.path.dirname(current_dir)) if "current_dir" in locals() else os.getcwd()
-                csv_path = os.path.join(base_dir, "data", "EN_Card_Data.csv")
+            candidates = [
+                os.path.join(current_dir, "EN_Card_Data.csv"),
+                os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(current_dir))), "EN_Card_Data.csv"),
+                os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(current_dir)))), "data", "EN_Card_Data.csv"),
+                "/kaggle_simulations/agent/EN_Card_Data.csv",
+                os.path.join(os.getcwd(), "data", "EN_Card_Data.csv"),
+                os.path.join(os.getcwd(), "EN_Card_Data.csv"),
+            ]
+            for path in candidates:
+                if os.path.exists(path):
+                    csv_path = path
+                    break
+            
+            if csv_path is None:
+                csv_path = "EN_Card_Data.csv"  # Fallback to current working directory default
             
         self.cards = {}
         self.load_database(csv_path)
