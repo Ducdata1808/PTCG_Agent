@@ -13,16 +13,20 @@ pip install -r requirements.txt
 
 ## Local Evaluation & Testing
 
-You can evaluate your agent's decision-making locally by simulating games against a random player.
+You can evaluate your agent's decision-making locally by simulating multiple games against a benchmark opponent (e.g. a random agent).
 
 ### Running the Evaluation Benchmark
-To run 10 matches swapping going first and second and output the final win rate:
+To run the integrated evaluation benchmark:
 
 ```bash
 python scripts/evaluate.py
 ```
 
-*Note: This benchmark executes inside the simulation environment, feeding observations to your agent (`submission/main.py`) and passing actions back to the engine.*
+This tool simulates 10 games, alternating first/second turn order, and outputs:
+1. **Win Rate**: The percentage of matches won.
+2. **Victory Type Breakdown**: How many matches were won by taking all prize cards (Prize Out) vs. depleting the opponent's deck (Deck Out) or bench (Bench Out).
+3. **Average Game Metrics**: Comparison of average damage dealt, cards played, energy attached, and evolutions completed per game.
+4. **Decision Timings**: Average and maximum decision latencies to verify timing performance constraints.
 
 ---
 
