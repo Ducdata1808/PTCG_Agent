@@ -55,3 +55,29 @@ To run all tests (including database lookup tests):
 ```bash
 python -m unittest discover tests/
 ```
+
+---
+
+## Debugging & Tracing Tools
+
+For deep-diving into the agent's gameplay behavior and fixing edge cases, the following debugging tools are available in the `scripts/` folder:
+
+### 1. Game Tracing (`scripts/trace_game.py`)
+To watch a single full game play out step-by-step with raw logs and option choices:
+```bash
+python scripts/trace_game.py
+```
+
+### 2. Loss Trace Finder (`scripts/find_losing_trace.py`)
+To automatically run up to 50 simulated games, find the first game the heuristic agent loses, and print the last 30 turns of the decision history leading to the defeat:
+```bash
+python scripts/find_losing_trace.py
+```
+
+---
+
+## Performance Reports
+
+The performance, key features, and evaluation stats of the agent are documented in:
+* [report.md](file:///c:/Users/Admin/Documents/viet_code/python/PTCG_Agent/report.md): Baseline Heuristic Agent (V1.0) feature specifications and 50-game benchmark metrics.
+

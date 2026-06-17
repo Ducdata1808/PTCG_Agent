@@ -43,7 +43,7 @@ def play_single_game(agent0, agent1, deck0, deck1):
     
     try:
         while obs.current is None or obs.current.result == -1:
-            current_player = obs_dict["selectPlayer"] if "selectPlayer" in obs_dict else 0
+            current_player = obs.current.yourIndex if (obs.current is not None) else 0
             
             # Measure decision time
             t0 = time.perf_counter()
