@@ -33,9 +33,9 @@ Commented out the default retreat fallback which was causing the agent to retrea
 
 ---
 
-## 2. Benchmark Evaluation Metrics
+## 2. Benchmark Evaluation Metrics (Version 1.0)
 
-The agent was benchmarked against the **Random Agent** over **50 games** using the default evaluation harness:
+The baseline agent was benchmarked against the **Random Agent** over **50 games**:
 
 ### 2.1 Aggregated Metrics
 * **Win Rate**: **96.00%** (48 Wins, 2 Losses)
@@ -43,9 +43,9 @@ The agent was benchmarked against the **Random Agent** over **50 games** using t
 * **Errors / Timeouts**: **0**
 
 ### 2.2 Victory Type Breakdown (Heuristic Agent)
-* **Prize Out** (Took all prize cards): **45.8%** (22 games)
-* **Bench Out** (Opponent has no active/bench Pokémon left): **37.5%** (18 games)
-* **Deck Out** (Opponent starts turn with 0 cards in deck): **16.7%** (8 games)
+* **Prize Out**: **45.8%** (22 games)
+* **Bench Out**: **37.5%** (18 games)
+* **Deck Out**: **16.7%** (8 games)
 
 ### 2.3 Gameplay Averages (Per Game)
 | Metric | Heuristic Agent | Random Agent |
@@ -58,11 +58,43 @@ The agent was benchmarked against the **Random Agent** over **50 games** using t
 ### 2.4 Decision Latency
 * **Average Decision Time**: **0.12 ms**
 * **Maximum Decision Time**: **0.69 ms**
-* *(Both well within the competition limits of 10,000ms/turn)*
 
 ---
 
-## 3. Findings & Next Steps
+## 3. Version 2.0 — Information Set Monte Carlo Tree Search (IS-MCTS) Agent
 
-* **Randomness Ceiling**: A 96.00% win rate is the practical maximum for a rule-based agent against a random opponent due to unavoidable RNG factors (e.g., drawing no basic Pokémon in the opening hand and benched out via mulligans, or unfortunate prize card locks).
-* **Search Integration**: To progress further and prepare for competitive match-making, the next phase will integrate the C++ search API (`search_begin` / `search_step`) to perform Monte Carlo Tree Search (MCTS) lookahead.
+To prepare the agent for competitive matchmaking against human-engineered agents, we implemented an **IS-MCTS Search Agent** that runs lookahead simulations.
+
+### 3.1 Key Features & Enhancements
+* **State Determinization**: Samples hidden card lists (opponent's hand, deck, prizes, own prizes) and predicts opponent deck archetypes (Water vs. Rocket's Mewtwo).
+* **PUCT (Predictor + UCB) Selection**: Directs the lookahead search using heuristic action priors to focus simulation resources on high-quality candidate moves.
+* **Heuristic State Evaluation**: Resolves rollout draw cutoffs (at depth 60) by scoring states using an additive logit function (prizes difference, play area HP, energy attached).
+* **MAIN Context Search**: Restricts MCTS node expansion solely to the high-level `SelectContext.MAIN` phase, resolving other game contexts (setup, discards, etc.) with the rule-based policy.
+* **Terminal Attack Bypassing**: Immediately executes attacks when recommended by the heuristic to save search time.
+
+### 3.2 Benchmark Evaluation Metrics (Version 2.0)
+
+The IS-MCTS agent was evaluated against the **Random Agent** over **10 games** with a search budget of **800ms**:
+
+* **Win Rate**: **80.00%** (8 Wins, 2 Losses)
+* **Average Turn Length**: **124.8 actions/game** (shorter, active game flow)
+* **Errors / Timeouts**: **0**
+
+#### Victory Type Breakdown
+* **Prize Out** (Took all prize cards): **62.5%** (5 games)
+* **Deck Out** (Opponent ran out of cards): **25.0%** (2 games)
+* **Bench Out** (Opponent has no Pokémon left): **12.5%** (1 games)
+
+#### Gameplay Averages (Per Game)
+| Metric | IS-MCTS Agent | Random Agent |
+|---|---|---|
+| **Damage Dealt** | 1234.0 | 243.0 |
+| **Cards Played** | 30.3 | 31.9 |
+| **Energy Attached** | 26.5 | 22.1 |
+| **Evolutions Done** | 1.9 | 3.6 |
+
+#### Decision Latency
+* **Average Decision Time**: **419.68 ms**
+* **Maximum Decision Time**: **804.21 ms**
+* *(Successfully operating within the competitive budget)*
+
