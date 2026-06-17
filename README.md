@@ -1,16 +1,6 @@
 # PTCG_Agent
 Build an AI Training Agent to play the Pokémon Trading Card Game.
 
-## Project Setup
-
-Install dependencies for local development and analysis:
-
-```bash
-pip install -r requirements.txt
-```
-
----
-
 ## Local Evaluation & Testing
 
 You can evaluate your agent's decision-making locally by simulating multiple games against a benchmark opponent (e.g. a random agent).
