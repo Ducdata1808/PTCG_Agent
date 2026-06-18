@@ -55,8 +55,7 @@ The baseline agent was benchmarked against the **Random Agent** over **50 games*
 * **Average Decision Time**: **0.12 ms**
 * **Maximum Decision Time**: **0.69 ms**
 
----
-# Version 2.0 — Information Set Monte Carlo Tree Search (IS-MCTS) Agent
+# 2. Version 2.0 — Information Set Monte Carlo Tree Search (IS-MCTS) Agent
 To prepare the agent for competitive matchmaking against human-engineered agents, we implemented an **IS-MCTS Search Agent** that runs lookahead simulations.
 ## 2.1 Key features and enhancements
 * **State Determinization**: Samples hidden card lists (opponent's hand, deck, prizes, own prizes) and predicts opponent deck archetypes (Water vs. Rocket's Mewtwo).
