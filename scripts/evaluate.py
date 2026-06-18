@@ -13,13 +13,60 @@ from cg.api import to_observation_class, LogType
 
 from main import agent as heuristic_agent
 
-# Random Agent for benchmarking
-def random_agent(obs_dict) -> list[int]:
-    obs = to_observation_class(obs_dict)
+# Pure Heuristic Agent (Version 1.0)
+def pure_heuristic_agent(obs_dict) -> list[int]:
+    from main import evaluate_setup_active, evaluate_setup_bench, evaluate_main_phase, evaluate_discard_context, evaluate_to_hand_context, read_deck_csv, db, get_attack_damage_by_id
+    from cg.api import Observation, to_observation_class, SelectContext, AreaType, OptionType
+    
+    obs: Observation = to_observation_class(obs_dict)
     if obs.select is None:
-        from main import read_deck_csv
         return read_deck_csv()
-    return random.sample(list(range(len(obs.select.option))), obs.select.maxCount)
+        
+    options = obs.select.option
+    context = obs.select.context
+    
+    if context == SelectContext.SETUP_ACTIVE_POKEMON:
+        return evaluate_setup_active(options, obs)
+    elif context == SelectContext.SETUP_BENCH_POKEMON:
+        return evaluate_setup_bench(options, obs)
+    elif context == SelectContext.MAIN:
+        return evaluate_main_phase(options, obs)
+    elif context == SelectContext.DISCARD:
+        return evaluate_discard_context(options, obs)
+    elif context in {SelectContext.TO_HAND, SelectContext.TO_BENCH, SelectContext.TO_FIELD}:
+        return evaluate_to_hand_context(options, obs)
+    elif context == SelectContext.ATTACK:
+        best_idx = 0
+        max_damage = -1
+        for idx, opt in enumerate(options):
+            damage = get_attack_damage_by_id(opt.attackId)
+            if damage > max_damage:
+                max_damage = damage
+                best_idx = idx
+        return [best_idx]
+    elif context == SelectContext.TO_ACTIVE:
+        player_idx = obs.current.yourIndex
+        bench = obs.current.players[player_idx].bench
+        best_idx = 0
+        best_score = -1
+        for idx, opt in enumerate(options):
+            bench_idx = opt.index
+            attached_energy = 0
+            if bench_idx is not None and bench_idx < len(bench):
+                attached_energy = len(bench[bench_idx].energies)
+            score = attached_energy * 10
+            if score > best_score:
+                best_score = score
+                best_idx = idx
+        return [best_idx]
+    elif context == SelectContext.ATTACH_TO:
+        for idx, opt in enumerate(options):
+            if opt.inPlayArea == AreaType.ACTIVE:
+                return [idx]
+        return [0]
+        
+    max_count = obs.select.maxCount
+    return list(range(max_count))
 
 def play_single_game(agent0, agent1, deck0, deck1):
     """Play a game and return winner, reason, decision durations, damage, and actions."""
@@ -95,8 +142,8 @@ def play_single_game(agent0, agent1, deck0, deck1):
 
 def run_benchmark(num_games=20):
     print(f"=== RUNNING INTEGRATED EVALUATION BENCHMARK ({num_games} Games) ===")
-    print("Agent 0: Heuristic Agent (submission/main.py)")
-    print("Agent 1: Random Agent\n")
+    print("Agent 0: MCTS Search Agent (submission/main.py)")
+    print("Agent 1: Pure Heuristic Agent (Version 1)\n")
     
     from main import read_deck_csv
     deck0 = read_deck_csv()
@@ -122,7 +169,7 @@ def run_benchmark(num_games=20):
         
         # Swapping player order for fairness
         if i % 2 == 0:
-            stats = play_single_game(heuristic_agent, random_agent, deck0, deck1)
+            stats = play_single_game(heuristic_agent, pure_heuristic_agent, deck0, deck1)
             if stats and stats['winner'] == 0:
                 agent0_wins += 1
                 win_reasons[stats['win_reason']] += 1
@@ -131,8 +178,7 @@ def run_benchmark(num_games=20):
             else:
                 errors += 1
         else:
-            stats = play_single_game(random_agent, heuristic_agent, deck1, deck0)
-            # When swapped, heuristic agent is Player 1 in the engine
+            stats = play_single_game(pure_heuristic_agent, heuristic_agent, deck1, deck0)
             if stats and stats['winner'] == 1:
                 agent0_wins += 1
                 win_reasons[stats['win_reason']] += 1
@@ -166,24 +212,24 @@ def run_benchmark(num_games=20):
     print("\n\n" + "="*41)
     print("           BENCHMARK RESULTS           ")
     print("="*41)
-    print(f"Heuristic Agent Wins : {agent0_wins} ({win_rate:.2f}%)")
-    print(f"Random Agent Wins    : {agent1_wins} ({100 - win_rate:.2f}%)")
-    print(f"Errors / Timeouts    : {errors}")
-    print(f"Average Turn Length  : {avg_turns:.1f} actions/game")
+    print(f"MCTS Search Agent Wins    : {agent0_wins} ({win_rate:.2f}%)")
+    print(f"Pure Heuristic Agent Wins : {agent1_wins} ({100 - win_rate:.2f}%)")
+    print(f"Errors / Timeouts         : {errors}")
+    print(f"Average Turn Length       : {avg_turns:.1f} actions/game")
     
-    print("\n--- VICTORY TYPE BREAKDOWN (Heuristic) ---")
+    print("\n--- VICTORY TYPE BREAKDOWN (MCTS Search Agent) ---")
     for reason, count in win_reasons.items():
         pct = count / agent0_wins * 100 if agent0_wins > 0 else 0
         print(f"* {reason}: {count} games ({pct:.1f}%)")
         
-    print("\n--- AVERAGE METRICS PER GAME (Heuristic vs Random) ---")
+    print("\n--- AVERAGE METRICS PER GAME (MCTS vs Pure Heuristic) ---")
     print(f"Damage Dealt     : {total_damage_dealt[0]/num_games:.1f} vs {total_damage_dealt[1]/num_games:.1f}")
     print(f"Cards Played     : {total_played[0]/num_games:.1f} vs {total_played[1]/num_games:.1f}")
     print(f"Energy Attached  : {total_attached[0]/num_games:.1f} vs {total_attached[1]/num_games:.1f}")
     print(f"Evolutions Done  : {total_evolved[0]/num_games:.1f} vs {total_evolved[1]/num_games:.1f}")
     
     print("\n--- DECISION TIMINGS ---")
-    for name, p_idx in [("Heuristic Agent", 0), ("Random Agent", 1)]:
+    for name, p_idx in [("MCTS Agent", 0), ("Pure Heuristic Agent", 1)]:
         times = all_decision_times[p_idx]
         if times:
             avg_time = sum(times) / len(times) * 1000

@@ -1,0 +1,28 @@
+4 Froakie CRI 20
+3 Frogadier CRI 21
+2 Greninja ex TWM 106
+2 Mega Greninja ex CRI 22
+2 Dunsparce JTG 120
+2 Dudunsparce TEF 129
+1 Dudunsparce ex JTG 121
+1 Meowth ex POR 62
+1 Fezandipiti ex ASC 142
+1 Budew ASC 16
+1 Psyduck ASC 39
+4 Lillie's Determination MEG 119
+3 Hilda WHT 84
+2 Boss's Orders MEG 114
+1 AZ's Tranquility CRI 76
+4 Poké Pad POR 81
+4 Buddy-Buddy Poffin TEF 144
+3 Ultra Ball MEG 131
+3 Rare Candy MEG 125
+1 Night Stretcher ASC 196
+1 Special Red Card CRI 82
+1 Energy Retrieval SVI 171
+1 Air Balloon ASC 181
+2 Surfing Beach MEG 129
+
+7 Water Energy MEE 3
+2 Ignition Energy WHT 86
+1 Neo Upper Energy TEF 162

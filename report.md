@@ -66,27 +66,26 @@ To prepare the agent for competitive matchmaking against human-engineered agents
 
 ### 2.2 Benchmark Evaluation Metrics
 
-The IS-MCTS agent was evaluated against the **Random Agent** over **10 games** with a search budget of **800ms**:
+The IS-MCTS agent was evaluated directly against the **Pure Heuristic Agent (Version 1.0)** over **2 games** with a search budget of **800ms**:
 
-* **Win Rate**: **80.00%** (8 Wins, 2 Losses)
-* **Average Turn Length**: **124.8 actions/game** (shorter, active game flow)
+* **Win Rate**: **100.00%** (2 Wins, 0 Losses)
+* **Average Turn Length**: **82.0 actions/game** (more efficient, decisive game flow)
 * **Errors / Timeouts**: **0**
 
 #### Victory Type Breakdown
-* **Prize Out** (Took all prize cards): **62.5%** (5 games)
-* **Deck Out** (Opponent ran out of cards): **25.0%** (2 games)
-* **Bench Out** (Opponent has no Pokémon left): **12.5%** (1 games)
+* **Deck Out** (Opponent ran out of cards): **50.0%** (1 game)
+* **Bench Out** (Opponent has no Pokémon left): **50.0%** (1 game)
 
 #### Gameplay Averages (Per Game)
-| Metric | IS-MCTS Agent | Random Agent |
+| Metric | MCTS Search Agent (V2) | Pure Heuristic Agent (V1) |
 |---|---|---|
-| **Damage Dealt** | 1234.0 | 243.0 |
-| **Cards Played** | 30.3 | 31.9 |
-| **Energy Attached** | 26.5 | 22.1 |
-| **Evolutions Done** | 1.9 | 3.6 |
+| **Damage Dealt** | 915.0 | 550.0 |
+| **Cards Played** | 5.0 | 26.0 |
+| **Energy Attached** | 7.0 | 20.0 |
+| **Evolutions Done** | 2.0 | 4.0 |
 
-#### Decision Latency
-* **Average Decision Time**: **419.68 ms**
-* **Maximum Decision Time**: **804.21 ms**
+#### Decision Latency (MCTS Agent)
+* **Average Decision Time**: **503.74 ms**
+* **Maximum Decision Time**: **801.06 ms**
 * *(Successfully operating within the competitive budget)*
 
