@@ -104,6 +104,8 @@ def run_single_game(args):
     deck0_path, deck1_path, seed = args
     random.seed(seed)
     os.environ["MCTS_TIME_LIMIT_MS"] = "150.0"
+    os.environ["AGENT0_DECK_PATH"] = deck0_path
+    os.environ["AGENT1_DECK_PATH"] = deck1_path
     
     # We run the game with a localized retry/timeout safety
     try:

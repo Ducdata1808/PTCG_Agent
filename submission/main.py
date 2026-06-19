@@ -29,13 +29,19 @@ GLOBAL_TIME_SPENT = 0.0
 PREV_TURN = -1
 
 
-def read_deck_csv() -> list[int]:
-    """Read deck.csv and return list of 60 card IDs."""
-    file_path = "deck.csv"
-    if not os.path.exists(file_path):
-        file_path = os.path.join("/kaggle_simulations/agent/", file_path)
-    if not os.path.exists(file_path):
-        file_path = os.path.join(AGENT_DIR, "deck.csv")
+def read_deck_csv(player_idx: int | None = None) -> list[int]:
+    """Read deck.csv or environment variable deck path and return list of 60 card IDs."""
+    file_path = None
+    if player_idx is not None:
+        file_path = os.getenv(f"AGENT{player_idx}_DECK_PATH")
+    if not file_path:
+        file_path = os.getenv("AGENT_DECK_PATH")
+    if not file_path:
+        file_path = "deck.csv"
+        if not os.path.exists(file_path):
+            file_path = os.path.join("/kaggle_simulations/agent/", file_path)
+        if not os.path.exists(file_path):
+            file_path = os.path.join(AGENT_DIR, "deck.csv")
         
     deck = []
     with open(file_path, "r") as file:
@@ -429,6 +435,7 @@ def agent(obs_dict: dict) -> list[int]:
     start_call_time = time.perf_counter()
     
     obs: Observation = to_observation_class(obs_dict)
+    player_idx = obs.current.yourIndex if (obs.current is not None) else 0
     
     # Detect new game or turn reset to clear time accumulator
     current_turn = obs.current.turn if obs.current else 0
@@ -463,7 +470,7 @@ def agent(obs_dict: dict) -> list[int]:
                 GLOBAL_TIME_SPENT += elapsed
                 return heuristic_action
         try:
-            deck = read_deck_csv()
+            deck = read_deck_csv(player_idx)
             possible_actions = get_possible_actions(obs)
             
             # Base budget from env var (default 800ms)
