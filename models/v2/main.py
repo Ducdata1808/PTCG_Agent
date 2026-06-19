@@ -23,13 +23,19 @@ db = CardDatabase()
 # Load all attacks from the SDK and index by attackId
 ATTACK_DB = {a.attackId: a for a in all_attack()}
 
-def read_deck_csv() -> list[int]:
-    """Read deck.csv and return list of 60 card IDs."""
-    file_path = "deck.csv"
-    if not os.path.exists(file_path):
-        file_path = os.path.join("/kaggle_simulations/agent/", file_path)
-    if not os.path.exists(file_path):
-        file_path = os.path.join(AGENT_DIR, "deck.csv")
+def read_deck_csv(player_idx: int | None = None) -> list[int]:
+    """Read deck.csv or environment variable deck path and return list of 60 card IDs."""
+    file_path = None
+    if player_idx is not None:
+        file_path = os.getenv(f"AGENT{player_idx}_DECK_PATH")
+    if not file_path:
+        file_path = os.getenv("AGENT_DECK_PATH")
+    if not file_path:
+        file_path = "deck.csv"
+        if not os.path.exists(file_path):
+            file_path = os.path.join("/kaggle_simulations/agent/", file_path)
+        if not os.path.exists(file_path):
+            file_path = os.path.join(AGENT_DIR, "deck.csv")
         
     deck = []
     with open(file_path, "r") as file:
@@ -437,11 +443,13 @@ def agent(obs_dict: dict) -> list[int]:
         heuristic_action = evaluate_main_phase(options, obs)
         if heuristic_action:
             chosen_opt = options[heuristic_action[0]]
-            if chosen_opt.type == OptionType.ATTACK:
+            if chosen_opt.type in {OptionType.ATTACK, OptionType.ATTACH, OptionType.EVOLVE}:
                 return heuristic_action
         try:
-            deck = read_deck_csv()
-            action = perform_mcts(obs_dict, deck, time_limit_ms=800.0)
+            player_idx = obs.current.yourIndex if obs.current else 0
+            deck = read_deck_csv(player_idx)
+            time_limit = float(os.getenv("MCTS_TIME_LIMIT_MS", "800.0"))
+            action = perform_mcts(obs_dict, deck, time_limit_ms=time_limit)
             if action:
                 return action
         except Exception:

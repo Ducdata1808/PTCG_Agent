@@ -2,20 +2,18 @@ import os
 import random
 from cg.api import Observation, AreaType, Card
 
-# Predefined standard decks for archetype guessing
-ROCKETS_MEWTWO_DECK = [
-    400, 400, 400, 400, 401, 401, 401, 401, 431, 431, 414, 414, 432, 24, 434, 272,
-    1227, 1227, 1227, 1227, 1220, 1220, 1220, 1216, 1216, 1216, 1134, 1134, 1134, 1134,
-    1121, 1121, 1121, 1121, 1094, 1097, 1129, 1116, 1092, 1156, 1156, 1161, 1161, 1257,
-    1257, 15, 15, 15, 15, 1, 1, 1, 1, 1, 1, 1, 1, 5, 5, 5
-]
+import json
 
-WATER_DECK = [
-    1158, 721, 721, 722, 722, 722, 722, 723, 723, 723, 723, 1145, 1145, 1145, 1145,
-    1205, 1205, 1227, 1227, 1227, 1227, 1235, 1235, 1235, 1235, 3, 3, 3, 3, 3, 3,
-    3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-    3, 3, 3
-]
+# Load meta-decks list dynamically
+META_DECKS = {}
+try:
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    json_path = os.path.join(current_dir, "meta_decks.json")
+    if os.path.exists(json_path):
+        with open(json_path, "r") as f:
+            META_DECKS = json.load(f)
+except Exception:
+    pass
 
 def guess_opponent_decklist(obs: Observation, own_deck: list[int]) -> list[int]:
     """Guesses the opponent's starting 60-card list based on visible cards."""
@@ -46,27 +44,35 @@ def guess_opponent_decklist(obs: Observation, own_deck: list[int]) -> list[int]:
     for c in obs.current.players[opp_idx].discard:
         visible_ids.append(c.id)
         
-    # Check telltale cards
-    water_tells = {721, 722, 723, 1145, 1205, 1235, 1158, 3}
-    mewtwo_tells = {400, 401, 431, 414, 432, 24, 434, 272, 1220, 1216, 1257, 1134, 1121, 1094, 15, 5, 1}
+    best_deck_name = None
+    best_score = -1
     
-    water_score = sum(1 for cid in visible_ids if cid in water_tells)
-    mewtwo_score = sum(1 for cid in visible_ids if cid in mewtwo_tells)
-    
-    if water_score > mewtwo_score:
-        return list(WATER_DECK)
-    elif mewtwo_score > water_score:
-        return list(ROCKETS_MEWTWO_DECK)
-    
-    # Fallback to the other deck type if we know ours
-    own_mewtwo_score = sum(1 for cid in own_deck if cid in mewtwo_tells)
-    own_water_score = sum(1 for cid in own_deck if cid in water_tells)
-    
-    if own_mewtwo_score > own_water_score:
-        # If we run Mewtwo, default opponent to Water deck to simulate diversity
-        return list(WATER_DECK)
-    else:
-        return list(ROCKETS_MEWTWO_DECK)
+    for name, deck_ids in META_DECKS.items():
+        score = 0
+        temp_deck = list(deck_ids)
+        for cid in visible_ids:
+            if cid in temp_deck:
+                score += 1
+                temp_deck.remove(cid)
+        if score > best_score:
+            best_score = score
+            best_deck_name = name
+            
+    if best_deck_name and best_score > 0:
+        return list(META_DECKS[best_deck_name])
+        
+    # Fallback to the first deck in META_DECKS that is not identical to our own deck
+    if META_DECKS:
+        for name in META_DECKS:
+            return list(META_DECKS[name])
+            
+    # Universal fallback if JSON fails to load
+    return [
+        418, 418, 418, 418, 723, 723, 723, 723, 721, 721, 478, 1227, 1227, 1227, 1227,
+        1182, 1182, 1197, 1145, 1145, 1087, 1087, 1092, 1121, 1262, 1262, 1262, 1102,
+        1102, 1213, 1213, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+        3, 3, 3, 3, 3, 3, 3, 3, 3
+    ]
 
 def get_remaining_pool(starting_list: list[int], visible_ids: list[int]) -> list[int]:
     """Computes starting_list - visible_ids safely with duplicates."""
