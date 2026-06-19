@@ -162,14 +162,16 @@ def main():
         seed = int(time.time() * 1000) % 2**32 + i
         tasks.append((deck0_path, deck1_path, seed))
         
-    all_value_samples = []
     start_time = time.time()
     
-    # We will write/append chunks of samples to a temporary file,
-    # or write them periodically to prevent losing all data on crash/hang.
-    out_path = "data/self_play_data.json"
+    out_path = "data/self_play_data.jsonl"
     os.makedirs("data", exist_ok=True)
     
+    # Clear output file at start
+    with open(out_path, "w") as f:
+        pass
+        
+    total_samples = 0
     completed = 0
     with Pool(processes=cores) as pool:
         # We set a timeout per game to prevent hanging indefinitely
@@ -178,7 +180,11 @@ def main():
             try:
                 # 30 seconds limit per game execution in queue
                 val_samples, pol_samples = iterator.next(timeout=30.0)
-                all_value_samples.extend(val_samples)
+                if val_samples:
+                    total_samples += len(val_samples)
+                    with open(out_path, "a") as f:
+                        for s in val_samples:
+                            f.write(json.dumps(s) + "\n")
                 completed += 1
             except StopIteration:
                 break
@@ -189,19 +195,9 @@ def main():
             if completed % 50 == 0 or completed == num_games:
                 elapsed = time.time() - start_time
                 games_per_sec = completed / elapsed if elapsed > 0 else 0
-                print(f"Game {completed}/{num_games} completed. Total samples: {len(all_value_samples)}. Elapsed time: {elapsed:.1f}s ({games_per_sec:.2f} games/s)")
+                print(f"Game {completed}/{num_games} completed. Total samples: {total_samples}. Elapsed time: {elapsed:.1f}s ({games_per_sec:.2f} games/s)")
                 
-                # Checkpoint saving every 1000 games
-                if completed % 1000 == 0:
-                    with open(out_path, "w") as f:
-                        json.dump(all_value_samples, f)
-                    print(f"Checkpoint saved: {len(all_value_samples)} samples written to {out_path}")
-
-    # Final Save
-    with open(out_path, "w") as f:
-        json.dump(all_value_samples, f)
-        
-    print(f"Data collection complete! Saved {len(all_value_samples)} samples to {out_path}")
+    print(f"Data collection complete! Saved {total_samples} samples to {out_path}")
 
 if __name__ == "__main__":
     main()

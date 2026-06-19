@@ -16,20 +16,44 @@ from search.option_features import extract_option_features
 from search.features import extract_features
 
 def main():
-    data_path = "data/self_play_data.json"
+    data_path = "data/self_play_data.jsonl"
     if not os.path.exists(data_path):
-        print(f"Error: {data_path} not found. Run scripts/collect_data.py first.")
-        return
+        if os.path.exists("data/self_play_data.json"):
+            data_path = "data/self_play_data.json"
+        else:
+            print(f"Error: data/self_play_data.jsonl not found. Run scripts/collect_data.py first.")
+            return
         
     print("Loading self-play dataset...")
-    with open(data_path, "r") as f:
-        samples = json.load(f)
+    if data_path.endswith(".jsonl"):
+        # Count lines first to pre-allocate
+        num_samples = 0
+        with open(data_path, "r") as f:
+            for _ in f:
+                num_samples += 1
+                
+        print(f"Dataset contains {num_samples} samples. Pre-allocating memory...")
+        # Resolve number of features dynamically from first line
+        num_features = 42  # Default fallback
+        with open(data_path, "r") as f:
+            first_line = f.readline()
+            if first_line:
+                first_obj = json.loads(first_line)
+                num_features = len(first_obj["features"])
+                
+        X_val = np.zeros((num_samples, num_features), dtype=np.float32)
+        y_val = np.zeros(num_samples, dtype=np.float32)
         
-    print(f"Loaded {len(samples)} samples.")
-    
-    # 1. Train Value Network
-    X_val = np.array([s["features"] for s in samples], dtype=np.float32)
-    y_val = np.array([s["label"] for s in samples], dtype=np.float32)
+        with open(data_path, "r") as f:
+            for idx, line in enumerate(f):
+                obj = json.loads(line)
+                X_val[idx] = obj["features"]
+                y_val[idx] = obj["label"]
+    else:
+        with open(data_path, "r") as f:
+            samples = json.load(f)
+        X_val = np.array([s["features"] for s in samples], dtype=np.float32)
+        y_val = np.array([s["label"] for s in samples], dtype=np.float32)
     
     # Compute feature statistics for manual standardization
     means_val = np.mean(X_val, axis=0)
