@@ -1,6 +1,7 @@
 import os
 import sys
 import re
+import time
 
 try:
     AGENT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -15,13 +16,18 @@ sys.path.append(os.path.join(AGENT_DIR, "src"))
 
 from cg.api import Observation, to_observation_class, OptionType, SelectContext, AreaType, all_attack
 from core.card_database import CardDatabase
-from search.mcts_search import perform_mcts
+from search.mcts_search import perform_mcts, get_possible_actions
 
 # Initialize Card Database globally
 db = CardDatabase()
 
 # Load all attacks from the SDK and index by attackId
 ATTACK_DB = {a.attackId: a for a in all_attack()}
+
+# Time tracking global state
+GLOBAL_TIME_SPENT = 0.0
+PREV_TURN = -1
+
 
 def read_deck_csv() -> list[int]:
     """Read deck.csv and return list of 60 card IDs."""
@@ -418,8 +424,17 @@ def evaluate_to_hand_context(options, obs: Observation) -> list[int]:
     return selected_indices if len(selected_indices) >= min_count else list(range(min_count))
 
 def agent(obs_dict: dict) -> list[int]:
-    """Rule-Based AI Training Agent for PTCG."""
+    """Rule-Based AI Training Agent for PTCG with Adaptive Time Management."""
+    global GLOBAL_TIME_SPENT, PREV_TURN
+    start_call_time = time.perf_counter()
+    
     obs: Observation = to_observation_class(obs_dict)
+    
+    # Detect new game or turn reset to clear time accumulator
+    current_turn = obs.current.turn if obs.current else 0
+    if current_turn < PREV_TURN or current_turn <= 2:
+        GLOBAL_TIME_SPENT = 0.0
+    PREV_TURN = current_turn
     
     if obs.select is None:
         return read_deck_csv()
@@ -428,31 +443,74 @@ def agent(obs_dict: dict) -> list[int]:
     context = obs.select.context
     
     if context == SelectContext.SETUP_ACTIVE_POKEMON:
-        return evaluate_setup_active(options, obs)
+        result = evaluate_setup_active(options, obs)
+        elapsed = (time.perf_counter() - start_call_time) * 1000.0
+        GLOBAL_TIME_SPENT += elapsed
+        return result
         
     elif context == SelectContext.SETUP_BENCH_POKEMON:
-        return evaluate_setup_bench(options, obs)
+        result = evaluate_setup_bench(options, obs)
+        elapsed = (time.perf_counter() - start_call_time) * 1000.0
+        GLOBAL_TIME_SPENT += elapsed
+        return result
         
     elif context == SelectContext.MAIN:
         heuristic_action = evaluate_main_phase(options, obs)
         if heuristic_action:
             chosen_opt = options[heuristic_action[0]]
-            if chosen_opt.type == OptionType.ATTACK:
+            if chosen_opt.type in {OptionType.ATTACK, OptionType.ATTACH, OptionType.EVOLVE}:
+                elapsed = (time.perf_counter() - start_call_time) * 1000.0
+                GLOBAL_TIME_SPENT += elapsed
                 return heuristic_action
         try:
             deck = read_deck_csv()
-            action = perform_mcts(obs_dict, deck, time_limit_ms=800.0)
-            if action:
-                return action
+            possible_actions = get_possible_actions(obs)
+            
+            # Base budget from env var (default 800ms)
+            base_limit = float(os.getenv("MCTS_TIME_LIMIT_MS", "800.0"))
+            
+            # Scale down if very few choices to save time
+            if len(possible_actions) <= 2:
+                time_limit = min(200.0, base_limit)
+            elif len(possible_actions) <= 4:
+                time_limit = min(400.0, base_limit)
+            else:
+                time_limit = base_limit
+                
+            # Emergency fallback: Kaggle has 60 seconds total time bank per player.
+            # If spent > 48 seconds, completely skip MCTS and use heuristics.
+            # If spent > 38 seconds, reduce limit to 100ms.
+            if GLOBAL_TIME_SPENT > 48000.0:
+                time_limit = 0.0
+            elif GLOBAL_TIME_SPENT > 38000.0:
+                time_limit = min(100.0, time_limit)
+            elif GLOBAL_TIME_SPENT > 28000.0:
+                time_limit = min(250.0, time_limit)
+                
+            if time_limit > 0.0:
+                action = perform_mcts(obs_dict, deck, time_limit_ms=time_limit)
+                if action:
+                    elapsed = (time.perf_counter() - start_call_time) * 1000.0
+                    GLOBAL_TIME_SPENT += elapsed
+                    return action
         except Exception:
             pass
+            
+        elapsed = (time.perf_counter() - start_call_time) * 1000.0
+        GLOBAL_TIME_SPENT += elapsed
         return heuristic_action
         
     elif context == SelectContext.DISCARD:
-        return evaluate_discard_context(options, obs)
+        result = evaluate_discard_context(options, obs)
+        elapsed = (time.perf_counter() - start_call_time) * 1000.0
+        GLOBAL_TIME_SPENT += elapsed
+        return result
         
     elif context in {SelectContext.TO_HAND, SelectContext.TO_BENCH, SelectContext.TO_FIELD}:
-        return evaluate_to_hand_context(options, obs)
+        result = evaluate_to_hand_context(options, obs)
+        elapsed = (time.perf_counter() - start_call_time) * 1000.0
+        GLOBAL_TIME_SPENT += elapsed
+        return result
         
     elif context == SelectContext.ATTACK:
         best_idx = 0
@@ -462,7 +520,10 @@ def agent(obs_dict: dict) -> list[int]:
             if damage > max_damage:
                 max_damage = damage
                 best_idx = idx
-        return [best_idx]
+        result = [best_idx]
+        elapsed = (time.perf_counter() - start_call_time) * 1000.0
+        GLOBAL_TIME_SPENT += elapsed
+        return result
         
     elif context == SelectContext.TO_ACTIVE:
         player_idx = obs.current.yourIndex
@@ -481,13 +542,23 @@ def agent(obs_dict: dict) -> list[int]:
             if score > best_score:
                 best_score = score
                 best_idx = idx
-        return [best_idx]
+        result = [best_idx]
+        elapsed = (time.perf_counter() - start_call_time) * 1000.0
+        GLOBAL_TIME_SPENT += elapsed
+        return result
         
     elif context == SelectContext.ATTACH_TO:
         for idx, opt in enumerate(options):
             if opt.inPlayArea == AreaType.ACTIVE:
+                elapsed = (time.perf_counter() - start_call_time) * 1000.0
+                GLOBAL_TIME_SPENT += elapsed
                 return [idx]
+        elapsed = (time.perf_counter() - start_call_time) * 1000.0
+        GLOBAL_TIME_SPENT += elapsed
         return [0]
 
     max_count = obs.select.maxCount
-    return list(range(max_count))
+    result = list(range(max_count))
+    elapsed = (time.perf_counter() - start_call_time) * 1000.0
+    GLOBAL_TIME_SPENT += elapsed
+    return result
