@@ -89,3 +89,40 @@ The IS-MCTS agent was evaluated directly against the **Pure Heuristic Agent (Ver
 * **Maximum Decision Time**: **801.06 ms**
 * *(Successfully operating within the competitive budget)*
 
+---
+
+# 3. Version 3.0 — AlphaGo/AlphaZero Hybrid Neural MCTS Agent
+
+To resolve performance limitations of single-value network heuristics, we transitioned the search engine to an AlphaGo/AlphaZero-style architecture. This cooperative design uses two neural networks:
+1. **Value Network**: A Multi-Layer Perceptron (MLP) mapping 20 state features to the expected match outcome ($z \in [0.05, 0.95]$).
+2. **Policy Network**: A Policy MLP mapping 16 action option features to MCTS visit frequency targets, supplying dynamically predicted prior probabilities for PUCT selection.
+
+## 3.1 Architecture & Training
+* **Self-Play Match Collection**: Simulated **20,000 matches** (V3 vs. V2, choosing random decks from `decks/csv_file/` for each fight) on **18 CPU cores** with MCTS time limits set to 150ms per search.
+* **Dataset**: Gathered **6,897,706 state-outcome pairs** for training.
+* **Value MLP Performance**:
+  * Train $R^2$: **0.2253**
+  * Test $R^2$: **0.2234** (validated on 6.2 million samples)
+* **Policy MLP Performance** (Bootstrapped on strategic action preference scoring):
+  * Train $R^2$: **0.9912**
+  * Test $R^2$: **0.9767**
+* **NumPy Deployment**: Both networks are saved as JSON weights and biases. Their feedforward inference passes are implemented purely in NumPy, maintaining 100% Kaggle compatibility with zero PyTorch/scikit-learn sandbox package dependencies.
+
+## 3.2 Head-to-Head Benchmark Results (V3 vs V2)
+
+We evaluated V3 (AlphaGo Neural MCTS) directly against V2 (Heuristic MCTS, with weights disabled) over **10 games**:
+* **V3 Win Rate**: **80.00%** (8 Wins, 2 Losses)
+* **V2 Win Rate**: **20.00%** (2 Wins)
+* **Average Turn Length**: **94.9 actions/game**
+* **Victory Type Breakdown (V3)**:
+  * Deck Out: **50.0%** (4 games)
+  * Bench Out: **50.0%** (4 games)
+* **Gameplay Averages (Per Game)**:
+  * Damage Dealt: **804.0** (V3) vs **806.0** (V2)
+  * Cards Played: **30.3** (V3) vs **31.6** (V2)
+  * Energy Attached: **11.6** (V3) vs **11.4** (V2)
+  * Evolutions Done: **4.7** (V3) vs **3.6** (V2)
+* **Decision Timings**:
+  * **V3 Agent (AlphaGo Neural MCTS)**: Avg = **306.19 ms**, Max = **802.37 ms**
+  * **V2 Agent (Heuristic MCTS)**: Avg = **308.60 ms**, Max = **803.28 ms**
+

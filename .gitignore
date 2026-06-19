@@ -2,4 +2,6 @@ about_competitio/*
 plan.md
 data/*.pdf
 *.tar.gz
+data/self_play_data.json
+*.log
 

@@ -437,11 +437,12 @@ def agent(obs_dict: dict) -> list[int]:
         heuristic_action = evaluate_main_phase(options, obs)
         if heuristic_action:
             chosen_opt = options[heuristic_action[0]]
-            if chosen_opt.type == OptionType.ATTACK:
+            if chosen_opt.type in {OptionType.ATTACK, OptionType.ATTACH, OptionType.EVOLVE}:
                 return heuristic_action
         try:
             deck = read_deck_csv()
-            action = perform_mcts(obs_dict, deck, time_limit_ms=800.0)
+            time_limit = float(os.getenv("MCTS_TIME_LIMIT_MS", "800.0"))
+            action = perform_mcts(obs_dict, deck, time_limit_ms=time_limit)
             if action:
                 return action
         except Exception:
