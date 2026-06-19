@@ -98,11 +98,11 @@ To resolve performance limitations of single-value network heuristics, we transi
 2. **Policy Network**: A Policy MLP mapping 16 action option features to MCTS visit frequency targets, supplying dynamically predicted prior probabilities for PUCT selection.
 
 ## 3.1 Architecture & Training
-* **Self-Play Match Collection**: Simulated **20,000 matches** (V3 vs. V2, choosing random decks from `decks/csv_file/` for each fight) on **18 CPU cores** with MCTS time limits set to 150ms per search.
-* **Dataset**: Gathered **6,897,706 state-outcome pairs** for training.
+* **Self-Play Match Collection**: Simulated **50,000 matches** (V3 vs. V2, choosing random decks from `decks/csv_file/` for each fight) on **18 CPU cores** with MCTS time limits set to 150ms per search.
+* **Dataset**: Gathered **11,415,218 state-outcome pairs** for training.
 * **Value MLP Performance**:
-  * Train $R^2$: **0.2253**
-  * Test $R^2$: **0.2234** (validated on 6.2 million samples)
+  * Train $R^2$: **0.2188**
+  * Test $R^2$: **0.2189** (validated on 11.4 million samples)
 * **Policy MLP Performance** (Bootstrapped on strategic action preference scoring):
   * Train $R^2$: **0.9912**
   * Test $R^2$: **0.9767**
@@ -111,18 +111,19 @@ To resolve performance limitations of single-value network heuristics, we transi
 ## 3.2 Head-to-Head Benchmark Results (V3 vs V2)
 
 We evaluated V3 (AlphaGo Neural MCTS) directly against V2 (Heuristic MCTS, with weights disabled) over **10 games**:
-* **V3 Win Rate**: **80.00%** (8 Wins, 2 Losses)
-* **V2 Win Rate**: **20.00%** (2 Wins)
-* **Average Turn Length**: **94.9 actions/game**
+* **V3 Win Rate**: **50.00%** (5 Wins, 5 Losses)
+* **V2 Win Rate**: **50.00%** (5 Wins)
+* **Average Turn Length**: **85.2 actions/game**
 * **Victory Type Breakdown (V3)**:
-  * Deck Out: **50.0%** (4 games)
-  * Bench Out: **50.0%** (4 games)
+  * Bench Out: **40.0%** (2 games)
+  * Prize Out: **40.0%** (2 games)
+  * Deck Out: **20.0%** (1 game)
 * **Gameplay Averages (Per Game)**:
-  * Damage Dealt: **804.0** (V3) vs **806.0** (V2)
-  * Cards Played: **30.3** (V3) vs **31.6** (V2)
-  * Energy Attached: **11.6** (V3) vs **11.4** (V2)
-  * Evolutions Done: **4.7** (V3) vs **3.6** (V2)
+  * Damage Dealt: **917.0** (V3) vs **888.0** (V2)
+  * Cards Played: **23.5** (V3) vs **24.7** (V2)
+  * Energy Attached: **11.7** (V3) vs **10.3** (V2)
+  * Evolutions Done: **3.2** (V3) vs **3.3** (V2)
 * **Decision Timings**:
-  * **V3 Agent (AlphaGo Neural MCTS)**: Avg = **306.19 ms**, Max = **802.37 ms**
-  * **V2 Agent (Heuristic MCTS)**: Avg = **308.60 ms**, Max = **803.28 ms**
+  * **V3 Agent (AlphaGo Neural MCTS)**: Avg = **151.64 ms**, Max = **801.79 ms**
+  * **V2 Agent (Heuristic MCTS)**: Avg = **154.41 ms**, Max = **802.17 ms**
 
