@@ -66,10 +66,4 @@ python scripts/find_losing_trace.py
 
 ---
 
-## Performance Reports & Walkthroughs
-
-The design, features, and benchmark metrics for both versions of the agent are documented in:
-* [report.md](file:///c:/Users/Admin/Documents/viet_code/python/PTCG_Agent/report.md): Specifications and 50-game benchmark metrics for the baseline **Rule-Based Heuristic Agent (V1.0)**.
-* [walkthrough.md](file:///C:/Users/Admin/.gemini/antigravity-ide/brain/737e6ed2-d9c7-4cde-b81e-e27fd373d5ac/walkthrough.md): Comprehensive implementation details and 10-game benchmark metrics for the **Phase 2 IS-MCTS Search Agent** (featuring PUCT node selection, state determinization, and heuristic state evaluations).
-
 
