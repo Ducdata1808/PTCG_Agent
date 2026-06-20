@@ -135,7 +135,7 @@ To finalize the pipeline for Kaggle competition matchmaking, we implemented two 
 2. **Adaptive Time Management**: Scales the MCTS time limit per decision based on move complexity (e.g. 200ms/400ms when choice space is constrained) and monitors the total match time bank to trigger emergency heuristics cutoffs, preventing timeouts under Kaggle rules.
 
 ## 4.1 Architecture & Training
-* **Self-Play Match Collection**: Simulated **50,000 matches** of high-quality search play with dynamic deck mapping enabled on **18 CPU cores**.
+* **Self-Play Match Collection**: Simulated **50,000 matches** of high-quality search play with dynamic deck mapping enabled on **18 CPU cores**. Unlike previous runs, the 50,000 matches were played using a wide variety of random competitive meta-decks for both players to force the Value and Policy networks to learn generic board representation features.
 * **Dataset & Optimization**: Gathered **11,415,218 state-outcome pairs** saved progressively using a memory-optimized `.jsonl` streaming pipeline to prevent OOM errors.
 * **Value MLP Performance (V4)**:
   * Train $R^2$: **0.2188**
@@ -143,6 +143,14 @@ To finalize the pipeline for Kaggle competition matchmaking, we implemented two 
 * **Policy MLP Performance (V4)**:
   * Train $R^2$: **0.9912**
   * Test $R^2$: **0.9767**
+
+### 4.1.1 Analysis of Early Training Issues
+Despite the massive scale of the 50,000 matches training, early iterations of the V4 agent showed suboptimal decision-making in specific competitive scenarios (e.g., choosing to attach energy to a basic Riolu and passing while hoarding hand exchange/draw cards). This occurred because:
+1. **Misaligned Policy Priors:** The Policy Network's priors heavily favored raw energy attachments and basic play actions, leading the PUCT formula to ignore hand-exchange or draw cards in the MCTS tree.
+2. **Missing Rollout Turn-Resolution:** The MCTS rollout phase did not properly resolve full turn boundaries, which made passive actions appear safer to the Value Network than they actually were.
+3. **Restricted Action Space:** Heuristic filters originally locked out critical trainer options during node selection.
+These issues were fully resolved by fixing the Policy bootstrap targets, restoring turn-resolution rollouts, and opening up the action space.
+
 
 ## 4.2 Benchmark Results (Fixed V4 vs Heuristic Agent V1)
 
