@@ -4,6 +4,34 @@ Build and train a state-of-the-art AI agent (utilizing Information Set Monte Car
 
 ---
 
+## 📁 Repository File Structure
+
+```text
+PTCG_Agent/
+├── decks/                     # Meta-deck CSV layouts
+│   └── csv_file/              # Competitive archetype deck files (e.g. Alakazam.csv, Abomasnow.csv)
+├── submission/                # Final agent code & weights targeted for Kaggle submission
+│   ├── main.py                # Main submission agent entrypoint
+│   ├── deck.csv               # Currently active deck config
+│   ├── EN_Card_Data.csv       # Card database (SDK format)
+│   └── src/                   # Agent source code (core, search, MCTS, utils)
+│       └── search/
+│           ├── value_net_weights.json   # Value Network weight configuration
+│           └── policy_net_weights.json  # Policy Network weight configuration
+├── models/                    # Saved models directory
+├── scripts/                   # Pipelines & debugging tools
+│   ├── collect_data.py        # Self-play data collection engine
+│   ├── train_value_net.py     # Value/Policy network training loop
+│   ├── evaluate.py            # Local agent evaluation benchmark (V4 vs V1)
+│   └── evaluate_v4_vs_v2.py   # Head-to-head MCTS benchmark (V4 vs V2)
+├── tests/                     # Verification test suites
+├── manage_agent.py            # Unified pipeline manager CLI
+├── report.md                  # Development research findings and version summaries
+└── README.md                  # Project documentation & setup guide
+```
+
+---
+
 ## 🚀 Quick Start Pipeline
 
 We provide a unified management script `manage_agent.py` in the root folder to handle all configuration, training pipelines, evaluations, and packaging.
@@ -11,7 +39,7 @@ We provide a unified management script `manage_agent.py` in the root folder to h
 ### Step 1: Select & Validate Your Deck
 Choose your active training/submission deck from the meta-decks stored in `decks/csv_file/`:
 ```bash
-python manage_agent.py select-deck Greninja
+python manage_agent.py select-deck Alakazam
 ```
 *This copies the selected deck layout into `submission/deck.csv`.*
 
