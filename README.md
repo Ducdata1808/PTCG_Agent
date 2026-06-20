@@ -11,7 +11,7 @@ We provide a unified management script `manage_agent.py` in the root folder to h
 ### Step 1: Select & Validate Your Deck
 Choose your active training/submission deck from the meta-decks stored in `decks/csv_file/`:
 ```bash
-python manage_agent.py select-deck Alakazam
+python manage_agent.py select-deck Greninja
 ```
 *This copies the selected deck layout into `submission/deck.csv`.*
 
