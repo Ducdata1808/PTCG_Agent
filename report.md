@@ -128,7 +128,7 @@ We evaluated V3 (AlphaGo Neural MCTS) directly against V2 (Heuristic MCTS, with 
 
 ---
 
-# 4. Version 4.0 — Meta-Gaming and Adaptive Time Management Agent
+# 4. Version 4.0 — Meta-Gaming and Adaptive Time Management Agent, Mega Lucario
 
 To finalize the pipeline for Kaggle competition matchmaking, we implemented two strategic updates representing Phase 4:
 1. **Dynamic Meta-Gaming / Archetype Guesser**: Matches visible cards in play (active, bench, discard) against **19 pre-compiled meta-decks** to dynamically predict the opponent's exact 60-card list during search.
