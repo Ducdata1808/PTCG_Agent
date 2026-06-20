@@ -303,3 +303,18 @@ Over **10 games** using the Alakazam deck:
 * **Decision Latency**:
   * **V6 Agent**: Avg = **254.99 ms**, Max = **848.46 ms**
   * **V2 Agent**: Avg = **271.30 ms**, Max = **812.47 ms**
+
+## 6.4 Notice: Ineffectiveness of Hardcoded Deck-Specific Heuristics
+A key finding during Version 6 development was that **manually coding deck-specific heuristic rules is unnecessary and often counterproductive**. The Neural MCTS search naturally learns optimal card-hoarding and board-state value estimations without hand-crafted rules.
+
+### Case Study: Capping Bench Size for Alakazam
+Because Alakazam's attack scales with hand size, we attempted to hardcode an Alakazam-specific heuristic to conserve hand cards:
+* **Rule:** Capped the bench size to a maximum of 2 basic Pokémon and blocked playing non-essential item cards.
+* **Intended Goal:** Keep cards in hand to deal maximum damage.
+* **Actual Result:** The agent's win rate against MCTS V2 **dropped from 90% down to 30%**.
+
+### Why it failed:
+1. **Draw Engine Deprivation:** Capping the bench prevented the agent from setting up essential draw engines such as **Dudunsparce**, **Genesect**, and **Fezandipiti ex**. Without these benched engines drawing cards, the agent's hand size actually ended up smaller in the mid-to-late game.
+2. **State Distribution Shift:** Forcing artificial constraints on the agent's actions moved the board state outside the distribution that the Value Network was trained on, causing incorrect lookahead evaluations.
+3. **Conclusion:** Allowing the MCTS search and Neural Networks to naturally balance board setup and hand conservation is far superior to hardcoded heuristic strategies.
+
