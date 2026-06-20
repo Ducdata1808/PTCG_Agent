@@ -463,12 +463,6 @@ def agent(obs_dict: dict) -> list[int]:
         
     elif context == SelectContext.MAIN:
         heuristic_action = evaluate_main_phase(options, obs)
-        if heuristic_action:
-            chosen_opt = options[heuristic_action[0]]
-            if chosen_opt.type in {OptionType.ATTACK, OptionType.ATTACH, OptionType.EVOLVE}:
-                elapsed = (time.perf_counter() - start_call_time) * 1000.0
-                GLOBAL_TIME_SPENT += elapsed
-                return heuristic_action
         try:
             deck = read_deck_csv(player_idx)
             possible_actions = get_possible_actions(obs)

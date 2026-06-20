@@ -144,22 +144,57 @@ To finalize the pipeline for Kaggle competition matchmaking, we implemented two 
   * Train $R^2$: **0.9912**
   * Test $R^2$: **0.9767**
 
-## 4.2 Head-to-Head Benchmark Results (V4 vs V2)
+## 4.2 Benchmark Results (Fixed V4 vs Heuristic Agent V1)
 
-We evaluated V4 directly against V2 (with weights disabled) over **10 games**:
-* **V4 Win Rate**: **50.00%** (5 Wins, 5 Losses)
-* **V2 Win Rate**: **50.00%** (5 Wins)
-* **Average Turn Length**: **85.2 actions/game**
-* **Victory Type Breakdown (V4)**:
-  * Bench Out: **40.0%** (2 games)
-  * Prize Out: **40.0%** (2 games)
-  * Deck Out: **20.0%** (1 game)
-* **Gameplay Averages (Per Game)**:
-  * Damage Dealt: **917.0** (V4) vs **888.0** (V2)
-  * Cards Played: **23.5** (V4) vs **24.7** (V2)
-  * Energy Attached: **11.7** (V4) vs **10.3** (V2)
-  * Evolutions Done: **3.2** (V4) vs **3.3** (V2)
-* **Decision Timings**:
-  * **V4 Agent (Adaptive Neural MCTS)**: Avg = **151.64 ms**, Max = **801.79 ms** *(50% reduction in average latency compared to V3)*
-  * **V2 Agent (Heuristic MCTS)**: Avg = **154.41 ms**, Max = **802.17 ms**
+Following core fixes to the Policy Network bootstrap targets (to correctly prioritize Trainer/Supporter cards), restoration of the turn-resolution rollout phase in MCTS, and opening of the action space, the Version 4.0 agent was benchmarked directly against the **Pure Heuristic Agent (Version 1.0)** over **10 games**:
+
+* **Fixed V4 Win Rate**: **70.00%** (7 Wins, 3 Losses)
+* **Heuristic V1 Win Rate**: **30.00%** (3 Wins)
+* **Errors / Timeouts**: **0** (Stochastic MCTS simulation mismatches handled gracefully)
+* **Average Turn Length**: **82.8 actions/game** (highly efficient, decisive game flow)
+
+### Victory Type Breakdown (Fixed V4)
+* **Bench Out**: **57.1%** (4 games)
+* **Deck Out**: **28.6%** (2 games)
+* **Prize Out**: **14.3%** (1 game)
+
+### Gameplay Averages (Per Game)
+| Metric | Fixed V4 Agent | Heuristic Agent (V1) |
+|---|---|---|
+| **Damage Dealt** | 849.0 | 602.0 |
+| **Cards Played** | 14.7 | 26.1 |
+| **Energy Attached** | 9.5 | 10.9 |
+| **Evolutions Done** | 2.1 | 3.0 |
+
+### Decision Latency (Fixed V4)
+* **Average Decision Time**: **426.02 ms**
+* **Maximum Decision Time**: **841.74 ms**
+* *(Successfully operating within Kaggle's competitive budget)*
+
+### Head-to-Head Benchmark Results (Fixed V4 vs V2)
+
+We also evaluated the fixed Version 4.0 agent directly against the **V2 Search Agent (IS-MCTS with heuristics, weights disabled)** over **10 games**:
+
+* **Fixed V4 Win Rate**: **40.00%** (4 Wins, 6 Losses)
+* **V2 Win Rate**: **60.00%** (6 Wins)
+* **Errors / Timeouts**: **0**
+* **Average Turn Length**: **80.9 actions/game**
+
+#### Victory Type Breakdown (Fixed V4)
+* **Prize Out**: **75.0%** (3 games)
+* **Bench Out**: **25.0%** (1 game)
+
+#### Gameplay Averages (Per Game)
+| Metric | Fixed V4 Agent | V2 Search Agent |
+|---|---|---|
+| **Damage Dealt** | 808.0 | 998.0 |
+| **Cards Played** | 21.8 | 15.4 |
+| **Energy Attached** | 11.7 | 8.7 |
+| **Evolutions Done** | 2.0 | 2.1 |
+
+#### Decision Latency
+* **V4 Agent**: Avg = **322.27 ms**, Max = **811.30 ms**
+* **V2 Agent**: Avg = **373.66 ms**, Max = **808.36 ms**
+
+
 
