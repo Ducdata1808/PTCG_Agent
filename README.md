@@ -1,56 +1,64 @@
-# PTCG_Agent
-Build an AI Training Agent to play the Pokémon Trading Card Game.
+# PTCG Agent Development Suite
 
-## Local Evaluation & Testing
-
-You can evaluate your agent's decision-making locally by simulating multiple games against a benchmark opponent (e.g. a random agent).
-
-### Running the Evaluation Benchmark
-To run the integrated evaluation benchmark:
-
-```bash
-python scripts/evaluate.py
-```
-
-This tool simulates 10 games, alternating first/second turn order, and outputs:
-1. **Win Rate**: The percentage of matches won.
-2. **Victory Type Breakdown**: How many matches were won by taking all prize cards (Prize Out) vs. depleting the opponent's deck (Deck Out) or bench (Bench Out).
-3. **Average Game Metrics**: Comparison of average damage dealt, cards played, energy attached, and evolutions completed per game.
-4. **Decision Timings**: Average and maximum decision latencies to verify timing performance constraints.
+Build and train a state-of-the-art AI agent (utilizing Information Set Monte Carlo Tree Search and custom-tuned Value/Policy MLP networks) to play the Pokémon Trading Card Game.
 
 ---
 
-## Deck Validation Tests
+## 🚀 Quick Start Pipeline
 
-Whenever you add a new deck CSV file in the `decks/` folder, you can run the dynamic deck validation tests to ensure the deck matches the game's submission rules.
+We provide a unified management script `manage_agent.py` in the root folder to handle all configuration, training pipelines, evaluations, and packaging.
 
-### How it Works
-The validation test suite checks every `.csv` file in the `decks/` folder (as well as `data/sample_submission/deck.csv`) against the following constraints:
-1. Must contain **exactly 60 cards**.
-2. Every Card ID must exist in the card database (`EN_Card_Data.csv`).
-3. Must contain **at least 1 Basic Pokémon**.
-4. No card (by name) is duplicated more than **4 times** (excluding Basic Energy).
-5. Must contain at most **1 ACE SPEC** card.
+### Step 1: Select & Validate Your Deck
+Choose your active training/submission deck from the meta-decks stored in `decks/csv_file/`:
+```bash
+python manage_agent.py select-deck Alakazam
+```
+*This copies the selected deck layout into `submission/deck.csv`.*
 
-### Running the Tests
-To run the deck validation tests, execute the following command from the project root directory:
-
+Next, validate the selected deck to ensure it complies with the competition constraints (60 cards, max 4 duplicates, basic Pokémon requirements, etc.):
 ```bash
 python -m unittest tests/test_decks.py
 ```
 
-### Running All Tests
-To run all tests (including database lookup tests):
+### Step 2: Collect Data & Train Networks
+Run the self-play match data collection and train the Value & Policy networks:
+```bash
+# Example: Run 20,000 self-play training games
+python manage_agent.py train 20000
+```
+> [!IMPORTANT]
+> **CPU Utilization Note:** Data collection leverages Python's multiprocessing pool to execute games in parallel. This step will fully utilize all available CPU cores to maximize performance speed.
+
+This pipeline command automatically:
+1. Simulates $N$ matches (agent vs. random decks) and writes outcomes to `data/self_play_data.jsonl`.
+2. Fits the neural network MLPs on the generated samples.
+3. Syncs the trained weights into `models/v2/src/search/` and `submission/src/search/`.
+4. Packages the final assets into a submission-ready `submission.tar.gz` archive.
+
+### Step 3: Evaluate Performance
+Benchmark your trained agent (V4) against the Pure Heuristic baseline (V1) and the previous MCTS engine (V2) over 10 games:
+```bash
+python manage_agent.py evaluate
+```
+*This runs both the V4 vs. Heuristic and V4 vs. V2 local simulated match sets sequentially and displays the win rates and metrics.*
+
+### Step 4: Create Submission File
+To submit your agent to Kaggle, you need a compressed tarball containing the code, weights, and deck in the `submission/` directory.
+
+* If you ran **Step 2**, the pipeline has **already packaged `submission.tar.gz` for you**.
+* If you want to manually rebuild the package at any time (e.g. after modifying the active deck or code without retraining), run the following command from the project root:
 
 ```bash
-python -m unittest discover tests/
+tar -czf submission.tar.gz -C submission .
 ```
+
+Submit the resulting `submission.tar.gz` directly to Kaggle.
 
 ---
 
-## Debugging & Tracing Tools
+## 🛠️ Debugging & Tracing Tools
 
-For deep-diving into the agent's gameplay behavior and fixing edge cases, the following debugging tools are available in the `scripts/` folder:
+For deep-diving into the agent's gameplay behavior and inspecting decision logs:
 
 ### 1. Game Tracing (`scripts/trace_game.py`)
 To watch a single full game play out step-by-step with raw logs and option choices:
@@ -66,5 +74,5 @@ python scripts/find_losing_trace.py
 
 ---
 
-## AI Agent Development Progression
-Check in [report.md](https://github.com/Ducdata1808/PTCG_Agent/blob/main/report.md)
+## 📖 AI Agent Development Progression
+For detailed research findings, performance metrics, and win-rate logs across all versions, see the [report.md](report.md).
