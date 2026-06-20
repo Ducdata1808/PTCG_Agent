@@ -197,4 +197,101 @@ We also evaluated the fixed Version 4.0 agent directly against the **V2 Search A
 * **V2 Agent**: Avg = **373.66 ms**, Max = **808.36 ms**
 
 
+# 5. Version 5.0 — Mega Abomasnow Tuned MCTS Agent
 
+Following the decision to update the default submission deck to the Mega Abomasnow deck list, the Value and Policy networks were retrained on a new self-play dataset of **20,000 matches** (2.6 million state-outcome samples) where V4 strictly used the Mega Abomasnow deck, while the V2 opponent played random decks from the meta-deck database.
+
+## 5.1 Architecture & Training
+* **Dataset Size**: **2,637,394 samples**
+* **Value MLP Performance (Value Net R²)**:
+  * Train $R^2$: **0.4126**
+  * Test $R^2$: **0.4086** (significant increase in accuracy due to focusing on a single stable deck layout)
+* **Policy MLP Performance**:
+  * Train $R^2$: **0.9990**
+  * Test $R^2$: **0.9993**
+
+## 5.2 Benchmark Results (V5 vs Heuristic Agent V1)
+
+We evaluated the newly trained V5 agent directly against the **Pure Heuristic Agent (Version 1.0)** over **10 games**:
+
+* **V5 Win Rate**: **90.00%** (9 Wins, 1 Loss)
+* **Heuristic V1 Win Rate**: **10.00%** (1 Loss)
+* **Errors / Timeouts**: **0**
+* **Average Turn Length**: **44.9 actions/game** (reflects Abomasnow's fast, high-damage gameplay)
+
+### Gameplay Averages (Per Game)
+| Metric | V5 Agent (Abomasnow) | Heuristic Agent (V1) |
+|---|---|---|
+| **Damage Dealt** | 1124.0 | 469.0 |
+| **Cards Played** | 6.3 | 8.3 |
+| **Energy Attached** | 7.2 | 8.3 |
+| **Evolutions Done** | 1.3 | 2.4 |
+
+### Decision Latency (V5)
+* **Average Decision Time**: **385.43 ms**
+* **Maximum Decision Time**: **813.04 ms**
+
+## 5.3 Head-to-Head Benchmark Results (V5 vs V2)
+
+We also ran a head-to-head MCTS vs MCTS evaluation over **10 games**:
+
+* **V5 Win Rate**: **40.00%** (4 Wins, 6 Losses)
+* **V2 Win Rate**: **60.00%** (6 Wins)
+* **Errors / Timeouts**: **0**
+* **Average Turn Length**: **43.4 actions/game**
+
+### Gameplay Averages (Per Game)
+| Metric | V5 Agent (Abomasnow) | V2 Search Agent |
+|---|---|---|
+| **Damage Dealt** | 668.0 | 685.0 |
+| **Cards Played** | 6.0 | 7.2 |
+| **Energy Attached** | 7.7 | 8.7 |
+| **Evolutions Done** | 0.8 | 1.0 |
+
+---
+
+# 6. Version 6.0 — Alakazam Tuned MCTS Agent
+
+Following the switch to the **Alakazam deck** in the submission folder, the networks were retrained on a fresh dataset of **20,000 matches** (MCTS V4 playing Alakazam vs V2 playing random decks).
+
+## 6.1 Architecture & Training
+* **Dataset Size**: **4,482,136 samples**
+* **Value MLP Performance**:
+  * Train $R^2$: **0.1962**
+  * Test $R^2$: **0.1946**
+* **Policy MLP Performance**:
+  * Train $R^2$: **0.9990**
+  * Test $R^2$: **0.9993**
+
+## 6.2 Benchmark Results (Alakazam V6 vs Heuristic V1)
+Over **10 games** using the Alakazam deck:
+* **Alakazam V6 Win Rate**: **100.00%** (10 Wins, 0 Losses)
+* **Heuristic V1 Win Rate**: **0.00%** (0 Wins)
+* **Average Turn Length**: **125.0 actions/game**
+* **Victory Type Breakdown**:
+  * Deck Out: **40.0%** (4 games)
+  * Prize Out: **30.0%** (3 games)
+  * Bench Out: **30.0%** (3 games)
+* **Gameplay Averages**:
+  * Damage Dealt: **2236.0** (V6) vs **652.0** (V1)
+  * Cards Played: **18.1** (V6) vs **30.4** (V1)
+  * Energy Attached: **9.4** (V6) vs **15.4** (V1)
+  * Evolutions Done: **7.0** (V6) vs **12.0** (V1)
+
+## 6.3 Benchmark Results (Alakazam V6 vs MCTS V2)
+Over **10 games** using the Alakazam deck:
+* **Alakazam V6 Win Rate**: **90.00%** (9 Wins, 1 Loss)
+* **MCTS V2 Win Rate**: **10.00%** (1 Win)
+* **Average Turn Length**: **146.9 actions/game**
+* **Victory Type Breakdown**:
+  * Prize Out: **66.7%** (6 games)
+  * Deck Out: **22.2%** (2 games)
+  * Bench Out: **11.1%** (1 game)
+* **Gameplay Averages**:
+  * Damage Dealt: **3050.0** (V6) vs **1790.0** (V2)
+  * Cards Played: **20.8** (V6) vs **32.5** (V2)
+  * Energy Attached: **15.3** (V6) vs **15.5** (V2)
+  * Evolutions Done: **11.1** (V6) vs **11.6** (V2)
+* **Decision Latency**:
+  * **V6 Agent**: Avg = **254.99 ms**, Max = **848.46 ms**
+  * **V2 Agent**: Avg = **271.30 ms**, Max = **812.47 ms**

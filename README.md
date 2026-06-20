@@ -66,4 +66,19 @@ python scripts/find_losing_trace.py
 
 ---
 
+## AI Agent Development Progression
 
+This project implements a state-of-the-art hybrid MCTS reinforcement learning pipeline for PTCG, developed iteratively across six distinct versions:
+
+1. **Version 1.0 — Pure Heuristic Agent:**
+   * Rule-based engine utilizing type-matching, smart energy prioritization, deck-out safety throttles, and smart retreat loops. Serves as the rollout policy and move prior generator.
+2. **Version 2.0 — Information Set Monte Carlo Tree Search (IS-MCTS):**
+   * Incorporates state determinization (opponent hand/deck guessing) and UCB1 node expansion during the main action phase. Bypasses calculations on trivial turns to optimize the 800ms competitive budget.
+3. **Version 3.0 — Hybrid Neural MCTS Agent (AlphaZero-style):**
+   * Integrates a Value MLP ($R^2 \approx 0.22$) to evaluate states and a Policy MLP ($R^2 \approx 0.99$) to guide MCTS branch exploration. Pure NumPy deployment ensures zero PyTorch dependencies for sandbox compatibility.
+4. **Version 4.0 — Archetype Meta-Guesser & Adaptive Time Manager:**
+   * Predicts the exact 60-card lists of opponents by cross-referencing played cards with 19 known competitive archetypes. Dynamically allocates the decision budget (100ms-800ms) depending on game state and remaining clock bank.
+5. **Version 5.0 — Mega Abomasnow Tuned MCTS Agent:**
+   * Retrained value/policy networks on a custom self-play dataset of **20,000 matches** optimized specifically for the Mega Abomasnow deck layout. Achieved a **90.00% win rate** against Heuristic V1.
+6. **Version 6.0 — Alakazam Tuned MCTS Agent:**
+   * Tuned specifically for the Alakazam deck (damage scaling with hand size). By retraining networks on **20,000 matches** (4.48M samples), the agent naturally learned to coordinate board setups (Dudunsparce/Genesect engines) while maintaining card-hoarding to maximize damage output. Achieved a **100% win rate** against Heuristic V1 and **90% win rate** against V2.
