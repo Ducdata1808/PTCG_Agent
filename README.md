@@ -5,6 +5,8 @@ Build and train a state-of-the-art AI agent (utilizing Information Set Monte Car
 About competition: https://www.kaggle.com/competitions/pokemon-tcg-ai-battle/overview
 
 Or https://github.com/Ducdata1808/PTCG_Agent/tree/main/about_competition
+
+
 ---
 
 ## 📁 Repository File Structure
