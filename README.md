@@ -2,6 +2,9 @@
 
 Build and train a state-of-the-art AI agent (utilizing Information Set Monte Carlo Tree Search and custom-tuned Value/Policy MLP networks) to play the Pokémon Trading Card Game.
 
+About competition: https://www.kaggle.com/competitions/pokemon-tcg-ai-battle/overview
+
+Or https://github.com/Ducdata1808/PTCG_Agent/tree/main/about_competition
 ---
 
 ## 📁 Repository File Structure
