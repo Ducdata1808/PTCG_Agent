@@ -147,10 +147,6 @@ def get_possible_actions(obs: Observation) -> list[tuple[int, ...]]:
     actions = []
     if min_count == 1 and max_count == 1:
         for idx in range(num_options):
-            if obs.select.context == SelectContext.MAIN:
-                opt = obs.select.option[idx]
-                if opt.type in {OptionType.ATTACH, OptionType.EVOLVE, OptionType.ATTACK}:
-                    continue
             actions.append((idx,))
         if not actions:
             for idx in range(num_options):
@@ -291,13 +287,16 @@ def perform_mcts(obs_dict: dict, own_deck: list[int], time_limit_ms: float = 120
                     if untried:
                         chosen_action = max(untried, key=lambda act: curr_node.priors.get(act, 0.0))
                         prior_val = curr_node.priors.get(chosen_action, 1.0 / len(node_actions))
-                        new_node = MCTSNode(parent=curr_node, action=chosen_action, prior=prior_val)
-                        curr_node.children[chosen_action] = new_node
-                        curr_node = new_node
-                        visited_path.append(curr_node)
-                        
-                        curr_search_state = search_step(curr_search_state.searchId, list(chosen_action))
-                        spawned_sids.append(curr_search_state.searchId)
+                        try:
+                            curr_search_state = search_step(curr_search_state.searchId, list(chosen_action))
+                            spawned_sids.append(curr_search_state.searchId)
+                            
+                            new_node = MCTSNode(parent=curr_node, action=chosen_action, prior=prior_val)
+                            curr_node.children[chosen_action] = new_node
+                            curr_node = new_node
+                            visited_path.append(curr_node)
+                        except Exception:
+                            break
                         break
                     else:
                         if not curr_node.children:
@@ -314,10 +313,13 @@ def perform_mcts(obs_dict: dict, own_deck: list[int], time_limit_ms: float = 120
                         if best_action is None:
                             break
                             
-                        curr_node = curr_node.children[best_action]
-                        visited_path.append(curr_node)
-                        curr_search_state = search_step(curr_search_state.searchId, list(best_action))
-                        spawned_sids.append(curr_search_state.searchId)
+                        try:
+                            curr_search_state = search_step(curr_search_state.searchId, list(best_action))
+                            spawned_sids.append(curr_search_state.searchId)
+                            curr_node = curr_node.children[best_action]
+                            visited_path.append(curr_node)
+                        except Exception:
+                            break
                 else:
                     action_indices = rollout_agent(curr_search_state.observation)
                     select_info = curr_search_state.observation.select
@@ -325,11 +327,35 @@ def perform_mcts(obs_dict: dict, own_deck: list[int], time_limit_ms: float = 120
                         action_indices = action_indices[:select_info.maxCount]
                         if len(action_indices) < select_info.minCount:
                             action_indices = list(range(select_info.minCount))
-                    curr_search_state = search_step(curr_search_state.searchId, action_indices)
-                    spawned_sids.append(curr_search_state.searchId)
+                    try:
+                        curr_search_state = search_step(curr_search_state.searchId, action_indices)
+                        spawned_sids.append(curr_search_state.searchId)
+                    except Exception:
+                        break
             
             rollout_state = curr_search_state
-            # Bypassed rollout loop for direct leaf network evaluation
+            
+            # Rollout phase: simulate using heuristic rollout policy until player's turn ends or game ends
+            rollout_steps = 0
+            while (rollout_state.observation.select and 
+                   rollout_state.observation.current and 
+                   rollout_state.observation.current.result == -1 and 
+                   rollout_state.observation.current.yourIndex == own_idx and 
+                   rollout_steps < 30):
+                
+                action_indices = rollout_agent(rollout_state.observation)
+                select_info = rollout_state.observation.select
+                if select_info:
+                    action_indices = action_indices[:select_info.maxCount]
+                    if len(action_indices) < select_info.minCount:
+                        action_indices = list(range(select_info.minCount))
+                
+                try:
+                    rollout_state = search_step(rollout_state.searchId, action_indices)
+                    spawned_sids.append(rollout_state.searchId)
+                except Exception:
+                    break
+                rollout_steps += 1
             
             outcome = 0.5
             if rollout_state.observation.current:

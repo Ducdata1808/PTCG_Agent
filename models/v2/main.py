@@ -441,10 +441,6 @@ def agent(obs_dict: dict) -> list[int]:
         
     elif context == SelectContext.MAIN:
         heuristic_action = evaluate_main_phase(options, obs)
-        if heuristic_action:
-            chosen_opt = options[heuristic_action[0]]
-            if chosen_opt.type in {OptionType.ATTACK, OptionType.ATTACH, OptionType.EVOLVE}:
-                return heuristic_action
         try:
             player_idx = obs.current.yourIndex if obs.current else 0
             deck = read_deck_csv(player_idx)

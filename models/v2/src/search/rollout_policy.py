@@ -315,9 +315,12 @@ def evaluate_to_hand_context(options, obs: Observation) -> list[int]:
     selected_indices = [idx for _, idx in scored_options[:max_count]]
     return selected_indices if len(selected_indices) >= min_count else list(range(min_count))
 
-def rollout_agent(obs_dict: dict) -> list[int]:
+def rollout_agent(obs_dict) -> list[int]:
     """Stateless rollout policy mapping observations to actions using optimized V1 rules."""
-    obs: Observation = to_observation_class(obs_dict)
+    if isinstance(obs_dict, Observation) or type(obs_dict).__name__ == "Observation":
+        obs = obs_dict
+    else:
+        obs: Observation = to_observation_class(obs_dict)
     
     if obs.select is None:
         # Default starting deck list selection (read locally if possible)

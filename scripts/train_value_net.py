@@ -94,43 +94,102 @@ def main():
         
     # 2. Bootstrap Policy Network
     # We will generate option features and train the Policy Network to assign higher scores to actions that align with strategic targets.
-    # To do this, we synthesize a dataset of option features:
-    # - OptionType.PLAY/ATTACH/EVOLVE/ATTACK/ABILITY get higher preference values when they align with the strategic goals.
-    # Let's generate a synthetic bootstrap dataset of option features (e.g. 50,000 samples)
+    # To do this, we synthesize a dataset of option features covering all action types.
     print("Generating bootstrap dataset for Policy Network...")
     X_pol = []
     y_pol = []
     
-    # Generate positive and negative samples for option types
+    # Generate realistic feature combinations
     for option_type in range(7):
         for hp_norm in [0.0, 0.3, 0.6, 0.9]:
             for energy_norm in [0.0, 0.2, 0.4, 0.6, 0.8]:
                 for match_type in [0.0, 1.0]:
-                    # Build feature vector of size 16
-                    feat = [0.0] * 16
-                    feat[option_type] = 1.0 # option type
-                    feat[10] = 1.0 # Is Pokémon
-                    feat[11] = hp_norm
-                    feat[14] = energy_norm
-                    feat[15] = match_type
-                    
-                    # Preference target: higher HP, higher energy, and matching type are preferred
-                    # Especially attacks (type 4), evolutions (type 2), and energy attachments (type 1)
-                    score = 0.1
-                    if option_type == 4: # Attack
-                        score = 0.9
-                    elif option_type == 2: # Evolve
-                        score = 0.8 + 0.1 * hp_norm
-                    elif option_type == 1: # Attach
-                        score = 0.5 + 0.4 * match_type + 0.1 * energy_norm
-                    elif option_type == 0: # Play basic
-                        score = 0.4 + 0.2 * hp_norm
-                    elif option_type == 3: # Ability
-                        score = 0.3
-                    
-                    X_pol.append(feat)
-                    y_pol.append(score)
-                    
+                    # 1. OptionType.PLAY (0)
+                    if option_type == 0:
+                        # Case A: Play Pokémon
+                        feat_pk = [0.0] * 16
+                        feat_pk[0] = 1.0
+                        feat_pk[10] = 1.0  # Is Pokémon
+                        feat_pk[11] = hp_norm
+                        feat_pk[13] = 1.0  # Bench target
+                        X_pol.append(feat_pk)
+                        y_pol.append(0.6 + 0.1 * hp_norm)
+                        
+                        # Case B: Play Trainer Supporter
+                        feat_sup = [0.0] * 16
+                        feat_sup[0] = 1.0
+                        feat_sup[7] = 1.0  # Is Trainer
+                        feat_sup[8] = 1.0  # Is Supporter
+                        X_pol.append(feat_sup)
+                        y_pol.append(0.8)  # High prior for draw/search supporter
+                        
+                        # Case C: Play Trainer Item
+                        feat_item = [0.0] * 16
+                        feat_item[0] = 1.0
+                        feat_item[7] = 1.0  # Is Trainer
+                        feat_item[9] = 1.0  # Is Item
+                        X_pol.append(feat_item)
+                        y_pol.append(0.7)  # High prior for search items
+                        
+                    # 2. OptionType.ATTACH (1)
+                    elif option_type == 1:
+                        for active in [0.0, 1.0]:
+                            feat = [0.0] * 16
+                            feat[1] = 1.0
+                            if active == 1.0:
+                                feat[12] = 1.0
+                            else:
+                                feat[13] = 1.0
+                            feat[14] = energy_norm
+                            feat[15] = match_type
+                            score = 0.5 + 0.3 * match_type + 0.1 * active
+                            X_pol.append(feat)
+                            y_pol.append(score)
+                            
+                    # 3. OptionType.EVOLVE (2)
+                    elif option_type == 2:
+                        for active in [0.0, 1.0]:
+                            feat = [0.0] * 16
+                            feat[2] = 1.0
+                            feat[10] = 1.0
+                            feat[11] = hp_norm
+                            if active == 1.0:
+                                feat[12] = 1.0
+                            else:
+                                feat[13] = 1.0
+                            feat[15] = match_type  # Active evolution or matching
+                            score = 0.7 + 0.1 * match_type + 0.1 * active
+                            X_pol.append(feat)
+                            y_pol.append(score)
+                            
+                    # 4. OptionType.ABILITY (3)
+                    elif option_type == 3:
+                        feat = [0.0] * 16
+                        feat[3] = 1.0
+                        X_pol.append(feat)
+                        y_pol.append(0.5)
+                        
+                    # 5. OptionType.ATTACK (4)
+                    elif option_type == 4:
+                        feat = [0.0] * 16
+                        feat[4] = 1.0
+                        X_pol.append(feat)
+                        y_pol.append(0.9)
+                        
+                    # 6. OptionType.RETREAT (5)
+                    elif option_type == 5:
+                        feat = [0.0] * 16
+                        feat[5] = 1.0
+                        X_pol.append(feat)
+                        y_pol.append(0.2)
+                        
+                    # 7. OptionType.END (6)
+                    elif option_type == 6:
+                        feat = [0.0] * 16
+                        feat[6] = 1.0
+                        X_pol.append(feat)
+                        y_pol.append(0.1)
+                        
     X_pol = np.array(X_pol, dtype=np.float32)
     y_pol = np.array(y_pol, dtype=np.float32)
     
