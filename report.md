@@ -54,7 +54,7 @@ The baseline agent was benchmarked against the **Random Agent** over **50 games*
 ### Decision Latency
 * **Average Decision Time**: **0.12 ms**
 * **Maximum Decision Time**: **0.69 ms**
-## 1.3 Result in kaggle
+## 1.3 Result on kaggle
 - win 0/3 matches with Mewtwo deck
 - Score: 359-600
 
@@ -92,7 +92,7 @@ The IS-MCTS agent was evaluated directly against the **Pure Heuristic Agent (Ver
 * **Maximum Decision Time**: **801.06 ms**
 * *(Successfully operating within the competitive budget)*
 
-## 2.3 Result in Kaggle
+## 2.3 Result on Kaggle
 - Mewtwo deck: win 3/12 matches, score 434 - 719
 - Mega Lucario ex deck: win 7/21 matches, score 473 - 853
 ---
@@ -116,7 +116,7 @@ To resolve performance limitations of single-value network heuristics, we transi
 
 ## 3.2 Head-to-Head Benchmark Results (V3 vs V2)
 
-We evaluated V3 (AlphaGo Neural MCTS) directly against V2 (Heuristic MCTS, with weights disabled) over **10 games**:
+We evaluated V3 (AlphaGo Neural MCTS) directly against V2 (Heuristic MCTS, with weights disabled) over **10 games** (Both V3 and V2 use the same submission deck)
 * **V3 Win Rate**: **80.00%** (8 Wins, 2 Losses)
 * **V2 Win Rate**: **20.00%** (2 Wins)
 * **Average Turn Length**: **94.9 actions/game**
@@ -131,7 +131,10 @@ We evaluated V3 (AlphaGo Neural MCTS) directly against V2 (Heuristic MCTS, with 
 * **Decision Timings**:
   * **V3 Agent (AlphaGo Neural MCTS)**: Avg = **306.19 ms**, Max = **802.37 ms**
   * **V2 Agent (Heuristic MCTS)**: Avg = **308.60 ms**, Max = **803.28 ms**
-
+ 
+## 3.3 Result on Kaggle
+- Mega Lucario ex deck: win 11/29 matches, score 420 - 728
+- Mega Lucario ex 2 deck: win 10/ 27, score 483 - 730
 ---
 
 # 4. Version 4.0 — Meta-Gaming and Adaptive Time Management Agent, Mega Lucario
