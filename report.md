@@ -339,4 +339,46 @@ The results showed that **increasing the training matches beyond 20,000 is unnec
 2. **Diminishing Returns on Value Net R²:** The Value Network R² remained stable at **0.1934** (compared to 0.1946 at 20k matches), showing that additional training volume did not significantly improve the neural network's capacity to estimate states.
 3. **Conclusion:** A budget of **20,000 matches** represents the optimal sweet spot for deck-specific tuning, providing maximum targeted performance with significantly shorter training times (~3 hours vs ~7.5 hours).
 
+# 7. Version 7.0 — Hop Trevenant Tuned MCTS Agent
 
+Following the switch to the **Hop Trevenant deck** in the submission folder, the networks were retrained on a fresh dataset of **20,000 matches** (MCTS V4 playing Hop Trevenant vs V2 playing random decks).
+
+## 7.1 Architecture & Training
+* **Dataset Size**: **4,444,830 samples**
+* **Value MLP Performance**:
+  * Train $R^2$: **0.2160**
+  * Test $R^2$: **0.2139**
+* **Policy MLP Performance**:
+  * Train $R^2$: **0.9990**
+  * Test $R^2$: **0.9993**
+
+## 7.2 Benchmark Results (Hop Trevenant V7 vs Heuristic V1)
+Over **10 games** using the Hop Trevenant deck:
+* **Hop Trevenant V7 Win Rate**: **80.00%** (8 Wins, 2 Losses)
+* **Heuristic V1 Win Rate**: **20.00%** (2 Losses)
+* **Average Turn Length**: **111.6 actions/game**
+* **Victory Type Breakdown**:
+  * Prize Out: **87.5%** (7 games)
+  * Bench Out: **12.5%** (1 game)
+* **Gameplay Averages**:
+  * Damage Dealt: **1273.0** (V7) vs **1104.0** (V1)
+  * Cards Played: **21.8** (V7) vs **36.4** (V1)
+  * Energy Attached: **11.7** (V7) vs **15.1** (V1)
+  * Evolutions Done: **4.6** (V7) vs **5.4** (V1)
+
+## 7.3 Benchmark Results (Hop Trevenant V7 vs MCTS V2)
+Over **10 games** using the Hop Trevenant deck:
+* **Hop Trevenant V7 Win Rate**: **50.00%** (5 Wins, 5 Losses)
+* **MCTS V2 Win Rate**: **50.00%** (5 Wins)
+* **Average Turn Length**: **113.7 actions/game**
+* **Victory Type Breakdown**:
+  * Prize Out: **80.0%** (4 games)
+  * Bench Out: **20.0%** (1 game)
+* **Gameplay Averages**:
+  * Damage Dealt: **1251.0** (V7) vs **1192.0** (V2)
+  * Cards Played: **26.9** (V7) vs **23.7** (V2)
+  * Energy Attached: **15.1** (V7) vs **15.1** (V2)
+  * Evolutions Done: **3.7** (V7) vs **5.2** (V2)
+* **Decision Latency**:
+  * **V7 Agent**: Avg = **297.59 ms**, Max = **815.04 ms**
+  * **V2 Agent**: Avg = **299.84 ms**, Max = **867.65 ms**
