@@ -65,6 +65,12 @@ python manage_agent.py train 20000
 > [!TIP]
 > **Training Volume Recommendation:** Experiments show that **20,000 matches** represents the optimal sweet spot for deck-specific tuning. Increasing the training matches to 50,000 matches is unnecessary and does not improve targeted win rates (due to generalization trade-offs) while tripling the training time (~7.5 hours vs ~3 hours). See the [report.md](report.md) Section 6.5 for the full case study.
 
+> [!WARNING]
+> **CPU-Only Training Requirement:** This project **only supports training and inference on the CPU**. Running training or tree search on a GPU is unsupported and would actually degrade performance due to three main reasons:
+> 1. **Tiny Model Architecture & Data Transfer Overhead:** The Value Network (`(64, 32)`) and Policy Network (`(32, 16)`) are extremely lightweight (under 10,000 parameters total). The math calculations take fractions of a millisecond on a CPU. Copying small tensors back and forth between System RAM and GPU VRAM over the PCIe bus introduces latency that is significantly larger than the execution time itself.
+> 2. **Kaggle Sandbox Constraints & Compatibility:** The Kaggle competition submission environment runs agents in a CPU-only sandbox with strict library limitations. To ensure 100% compatibility and zero external dependencies (no PyTorch/TensorFlow imports), the trained model weights are saved as JSON, and the feedforward inference is executed via pure NumPy on the CPU inside [main.py](file:///c:/Users/Admin/Documents/viet_code/python/PTCG_Agent/submission/main.py).
+> 3. **Sequential Game Logic & MCTS Bottlenecks:** Simulating match state transitions (evaluating card effects, updating HP, shuffling, drawing cards) and MCTS tree traversals are sequential logic tasks. They cannot be parallelized on a GPU. Instead, throughput scaling is achieved by executing games in parallel across multiple CPU cores using Python's multiprocessing pool.
+
 This pipeline command automatically:
 1. Simulates $N$ matches (agent vs. random decks) and writes outcomes to `data/self_play_data.jsonl`.
 2. Fits the neural network MLPs on the generated samples.
