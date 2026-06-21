@@ -54,8 +54,8 @@ The baseline agent was benchmarked against the **Random Agent** over **50 games*
 ### Decision Latency
 * **Average Decision Time**: **0.12 ms**
 * **Maximum Decision Time**: **0.69 ms**
-## 1.3 Result
-- win 0/3 matches in kaggle with Mewtwo deck
+## 1.3 Result in kaggle
+- win 0/3 matches with Mewtwo deck
 - Score: 359-600
 
 # 2. Version 2.0 — Information Set Monte Carlo Tree Search (IS-MCTS) Agent
@@ -92,9 +92,9 @@ The IS-MCTS agent was evaluated directly against the **Pure Heuristic Agent (Ver
 * **Maximum Decision Time**: **801.06 ms**
 * *(Successfully operating within the competitive budget)*
 
-## Result
+## 2.3 Result in Kaggle
 - Mewtwo deck: win 3/12 matches, score 434 - 719
-- Mega Lucario ex: win 7/21 matches, score 473 - 853
+- Mega Lucario ex deck: win 7/21 matches, score 473 - 853
 ---
 
 # 3. Version 3.0 — AlphaGo/AlphaZero Hybrid Neural MCTS Agent
