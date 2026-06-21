@@ -74,7 +74,7 @@ python manage_agent.py train 20000
 > **Training Volume Recommendation:** Experiments show that **20,000 matches** represents the optimal sweet spot for deck-specific tuning. Increasing the training matches to 50,000 matches is unnecessary and does not improve targeted win rates (due to generalization trade-offs) while tripling the training time (~7.5 hours vs ~3 hours). See the [report.md](report.md) Section 6.5 for the full case study.
 
 > [!WARNING]
-> **CPU-Only Training Requirement:** This project **only supports training and inference on the CPU**. Running training or tree search on a GPU is unsupported and would actually degrade performance.
+> **CPU-Only Training Requirement:** This project **only supports training and inference on the CPU**. Running training or tree search on a GPU is unsupported and would actually degrade performance (more details: Section 3 on https://github.com/Ducdata1808/PTCG_Agent/edit/main/report.md).
 
 This pipeline command automatically:
 1. Simulates $N$ matches (agent vs. random decks) and writes outcomes to `data/self_play_data.jsonl`.
