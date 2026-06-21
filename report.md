@@ -103,6 +103,12 @@ To resolve performance limitations of single-value network heuristics, we transi
 1. **Value Network**: A Multi-Layer Perceptron (MLP) mapping 20 state features to the expected match outcome ($z \in [0.05, 0.95]$).
 2. **Policy Network**: A Policy MLP mapping 16 action option features to MCTS visit frequency targets, supplying dynamically predicted prior probabilities for PUCT selection.
 
+> [!WARNING]
+> **CPU-Only Training Requirement:** This project **only supports training and inference on the CPU**. Running training or tree search on a GPU is unsupported and would actually degrade performance due to three main reasons:
+> 1. **Tiny Model Architecture & Data Transfer Overhead:** The Value Network (`(64, 32)`) and Policy Network (`(32, 16)`) are extremely lightweight (under 10,000 parameters total). The math calculations take fractions of a millisecond on a CPU. Copying small tensors back and forth between System RAM and GPU VRAM over the PCIe bus introduces latency that is significantly larger than the execution time itself.
+> 2. **Kaggle Sandbox Constraints & Compatibility:** The Kaggle competition submission environment runs agents in a CPU-only sandbox with strict library limitations. To ensure 100% compatibility and zero external dependencies (no PyTorch/TensorFlow imports), the trained model weights are saved as JSON, and the feedforward inference is executed via pure NumPy on the CPU inside [main.py](file:///c:/Users/Admin/Documents/viet_code/python/PTCG_Agent/submission/main.py).
+> 3. **Sequential Game Logic & MCTS Bottlenecks:** Simulating match state transitions (evaluating card effects, updating HP, shuffling, drawing cards) and MCTS tree traversals are sequential logic tasks. They cannot be parallelized on a GPU. Instead, throughput scaling is achieved by executing games in parallel across multiple CPU cores using Python's multiprocessing pool.
+
 ## 3.1 Architecture & Training
 * **Self-Play Match Collection**: Simulated **20,000 matches** (V3 vs. V2, choosing random decks from `decks/csv_file/` for each fight) on **18 CPU cores** with MCTS time limits set to 150ms per search.
 * **Dataset**: Gathered **6,897,706 state-outcome pairs** for training.
