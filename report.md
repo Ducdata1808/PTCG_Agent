@@ -91,6 +91,10 @@ The IS-MCTS agent was evaluated directly against the **Pure Heuristic Agent (Ver
 * **Average Decision Time**: **503.74 ms**
 * **Maximum Decision Time**: **801.06 ms**
 * *(Successfully operating within the competitive budget)*
+
+## Result
+- Mewtwo deck: win 3/12 matches, score 434 - 719
+- Mega Lucario ex: win 7/21 matches, score 473 - 853
 ---
 
 # 3. Version 3.0 — AlphaGo/AlphaZero Hybrid Neural MCTS Agent
