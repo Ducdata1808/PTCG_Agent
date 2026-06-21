@@ -41,6 +41,14 @@ PTCG_Agent/
 
 We provide a unified management script `manage_agent.py` in the root folder to handle all configuration, training pipelines, evaluations, and packaging.
 
+### Step 0: Create virtual environment and download dependencies
+```bash
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
+
+```
+
 ### Step 1: Select & Validate Your Deck
 Choose your active training/submission deck from the meta-decks stored in `decks/csv_file/`:
 ```bash
