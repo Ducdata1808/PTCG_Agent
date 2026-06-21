@@ -213,6 +213,9 @@ We also evaluated the fixed Version 4.0 agent directly against the **V2 Search A
 * **V4 Agent**: Avg = **322.27 ms**, Max = **811.30 ms**
 * **V2 Agent**: Avg = **373.66 ms**, Max = **808.36 ms**
 
+## 4.3 Result on Kaggle
+- Mega Lucario ex 2 (20000 training matches): win 7/20 matches, score 501 - 674
+- Mega Lucario ex 2 (50000 training matches): win 14/31 matches, score 410 - 600
 
 # 5. Version 5.0 — Mega Abomasnow Tuned MCTS Agent
 
@@ -265,6 +268,8 @@ We also ran a head-to-head MCTS vs MCTS evaluation over **10 games**:
 | **Energy Attached** | 7.7 | 8.7 |
 | **Evolutions Done** | 0.8 | 1.0 |
 
+## 5.4 Result on Kaggle
+- Win: 30/66 matches, score 478 - 770, final score 650
 ---
 
 # 6. Version 6.0 — Alakazam Tuned MCTS Agent
@@ -339,6 +344,9 @@ The results showed that **increasing the training matches beyond 20,000 is unnec
 2. **Diminishing Returns on Value Net R²:** The Value Network R² remained stable at **0.1934** (compared to 0.1946 at 20k matches), showing that additional training volume did not significantly improve the neural network's capacity to estimate states.
 3. **Conclusion:** A budget of **20,000 matches** represents the optimal sweet spot for deck-specific tuning, providing maximum targeted performance with significantly shorter training times (~3 hours vs ~7.5 hours).
 
+## 6.6 Result on Kaggle
+
+
 # 7. Version 7.0 — Hop Trevenant Tuned MCTS Agent
 
 Following the switch to the **Hop Trevenant deck** in the submission folder, the networks were retrained on a fresh dataset of **20,000 matches** (MCTS V4 playing Hop Trevenant vs V2 playing random decks).
@@ -382,3 +390,6 @@ Over **10 games** using the Hop Trevenant deck:
 * **Decision Latency**:
   * **V7 Agent**: Avg = **297.59 ms**, Max = **815.04 ms**
   * **V2 Agent**: Avg = **299.84 ms**, Max = **867.65 ms**
+
+ ## 7.4 Result on Kaggle
+ 
