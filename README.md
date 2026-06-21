@@ -62,6 +62,9 @@ python manage_agent.py train 20000
 > [!IMPORTANT]
 > **CPU Utilization Note:** Data collection leverages Python's multiprocessing pool to execute games in parallel. This step will fully utilize all available CPU cores to maximize performance speed.
 
+> [!TIP]
+> **Training Volume Recommendation:** Experiments show that **20,000 matches** represents the optimal sweet spot for deck-specific tuning. Increasing the training matches to 50,000 matches is unnecessary and does not improve targeted win rates (due to generalization trade-offs) while tripling the training time (~7.5 hours vs ~3 hours). See the [report.md](report.md) Section 6.5 for the full case study.
+
 This pipeline command automatically:
 1. Simulates $N$ matches (agent vs. random decks) and writes outcomes to `data/self_play_data.jsonl`.
 2. Fits the neural network MLPs on the generated samples.

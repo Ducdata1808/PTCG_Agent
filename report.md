@@ -318,3 +318,16 @@ Because Alakazam's attack scales with hand size, we attempted to hardcode an Ala
 2. **State Distribution Shift:** Forcing artificial constraints on the agent's actions moved the board state outside the distribution that the Value Network was trained on, causing incorrect lookahead evaluations.
 3. **Conclusion:** Allowing the MCTS search and Neural Networks to naturally balance board setup and hand conservation is far superior to hardcoded heuristic strategies.
 
+## 6.5 Training Volume and Diminishing Returns (20k vs. 50k Matches)
+To test if scaling up training yields higher performance, we retrained the Alakazam MCTS V4 networks on an expanded dataset of **50,000 matches** (generating **11,094,822 samples** over **7.5 hours** of CPU run time). 
+
+The results showed that **increasing the training matches beyond 20,000 is unnecessary**:
+* **20,000 Matches:** Achieved a **90% win rate** against both Heuristic V1 and MCTS V2.
+* **50,000 Matches:** Achieved a **60% win rate** against Heuristic V1 and a **50% win rate** against MCTS V2.
+
+### Why 50,000 matches did not improve target performance:
+1. **Generalization Trade-off:** The 50,000-match pipeline trains against a diverse set of random meta-decks. While this makes the model highly robust against the entire pool of 19 competitive meta-decks, it dilutes the deck-specific optimization for the Alakazam mirror matchup (which is used in local benchmarks).
+2. **Diminishing Returns on Value Net R²:** The Value Network R² remained stable at **0.1934** (compared to 0.1946 at 20k matches), showing that additional training volume did not significantly improve the neural network's capacity to estimate states.
+3. **Conclusion:** A budget of **20,000 matches** represents the optimal sweet spot for deck-specific tuning, providing maximum targeted performance with significantly shorter training times (~3 hours vs ~7.5 hours).
+
+
