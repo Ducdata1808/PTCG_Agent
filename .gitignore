@@ -5,4 +5,6 @@ data/*.pdf
 data/self_play_data.json
 data/self_play_data.jsonl
 *.log
+vis.json
+visualizer.html
 

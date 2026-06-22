@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PTCG AI Agent Battle Simulator</title>
+    <!-- Outfit Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="dashboard">
+        <header>
+            <h1>PTCG AI Battle Simulator</h1>
+            <p>Simulate matches between trained V4 agents using different meta-decks</p>
+        </header>
+
+        <div class="simulator-setup">
+            <!-- Player 1 Panel -->
+            <div class="deck-panel player1">
+                <h2>Player 1 (V4 Agent)</h2>
+                <label for="deck1">Select Active Deck</label>
+                <select id="deck1">
+                    <option value="" disabled selected>Loading decks...</option>
+                </select>
+                <div id="deckViewer1" class="deck-viewer">
+                    <h3>Deck List</h3>
+                    <div id="cardGrid1" class="card-grid"></div>
+                </div>
+            </div>
+
+            <!-- Player 2 Panel -->
+            <div class="deck-panel player2">
+                <h2>Player 2 (V4 Agent)</h2>
+                <label for="deck2">Select Opponent Deck</label>
+                <select id="deck2">
+                    <option value="" disabled selected>Loading decks...</option>
+                </select>
+                <div id="deckViewer2" class="deck-viewer">
+                    <h3>Deck List</h3>
+                    <div id="cardGrid2" class="card-grid"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="actions">
+            <button id="btnSimulate" class="btn-simulate" disabled>Simulate Battle</button>
+            
+            <!-- Status Panel -->
+            <div id="statusContainer" class="status-container">
+                <div class="spinner"></div>
+                <div id="statusText" class="status-text">Simulating matchup (this may take up to a minute)...</div>
+            </div>
+            
+            <div id="errorMsg" class="error-message"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const deck1Select = document.getElementById('deck1');
+            const deck2Select = document.getElementById('deck2');
+            const btnSimulate = document.getElementById('btnSimulate');
+            const statusContainer = document.getElementById('statusContainer');
+            const statusText = document.getElementById('statusText');
+            const errorMsg = document.getElementById('errorMsg');
+
+            const deckViewer1 = document.getElementById('deckViewer1');
+            const deckViewer2 = document.getElementById('deckViewer2');
+            const cardGrid1 = document.getElementById('cardGrid1');
+            const cardGrid2 = document.getElementById('cardGrid2');
+
+            // Load available decks from API
+            fetch('/api/decks')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success && data.decks.length > 0) {
+                        // Populate select options
+                        deck1Select.innerHTML = '';
+                        deck2Select.innerHTML = '';
+                        
+                        // Add Random Deck Option
+                        const randOpt1 = document.createElement('option');
+                        randOpt1.value = '_random_';
+                        randOpt1.textContent = '🎲 Random Deck';
+                        const randOpt2 = document.createElement('option');
+                        randOpt2.value = '_random_';
+                        randOpt2.textContent = '🎲 Random Deck';
+                        
+                        deck1Select.appendChild(randOpt1);
+                        deck2Select.appendChild(randOpt2);
+                        
+                        data.decks.forEach((deck, idx) => {
+                            const opt1 = document.createElement('option');
+                            opt1.value = deck;
+                            opt1.textContent = deck;
+                            const opt2 = document.createElement('option');
+                            opt2.value = deck;
+                            opt2.textContent = deck;
+                            
+                            // Select first two decks as default if possible
+                            if (idx === 0) opt1.selected = true;
+                            if (idx === Math.min(1, data.decks.length - 1)) opt2.selected = true;
+
+                            deck1Select.appendChild(opt1);
+                            deck2Select.appendChild(opt2);
+                        });
+
+                        btnSimulate.disabled = false;
+                        
+                        // Load initial deck details
+                        loadDeckDetails(deck1Select.value, cardGrid1, deckViewer1);
+                        loadDeckDetails(deck2Select.value, cardGrid2, deckViewer2);
+                    } else {
+                        showError('Failed to load meta-decks.');
+                    }
+                })
+                .catch(err => {
+                    showError('Error connecting to backend API.');
+                    console.error(err);
+                });
+
+            // Listen to dropdown changes
+            deck1Select.addEventListener('change', () => {
+                loadDeckDetails(deck1Select.value, cardGrid1, deckViewer1);
+            });
+            deck2Select.addEventListener('change', () => {
+                loadDeckDetails(deck2Select.value, cardGrid2, deckViewer2);
+            });
+
+            function loadDeckDetails(deckName, gridElement, viewerElement) {
+                if (!deckName) return;
+                if (deckName === '_random_') {
+                    gridElement.innerHTML = `
+                        <div class="mystery-deck-placeholder">
+                            <div class="mystery-card-back">❓</div>
+                            <p>Mystery Deck</p>
+                            <span>Selected randomly at match start</span>
+                        </div>
+                    `;
+                    viewerElement.style.display = 'block';
+                    return;
+                }
+                fetch(`/api/deck-details/${deckName}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success && data.cards) {
+                            gridElement.innerHTML = '';
+                            data.cards.forEach(card => {
+                                const item = document.createElement('div');
+                                item.className = 'card-item';
+                                
+                                const wrapper = document.createElement('div');
+                                wrapper.className = 'card-item-wrapper';
+                                
+                                const img = document.createElement('img');
+                                img.src = `/static/card_images/${card.id}.png`;
+                                img.onerror = () => {
+                                    img.src = `https://placehold.co/70x98/1e293b/f8fafc?text=${encodeURIComponent(card.name)}`;
+                                };
+                                
+                                const badge = document.createElement('div');
+                                badge.className = 'card-badge';
+                                badge.textContent = `x${card.count}`;
+                                
+                                const tooltip = document.createElement('div');
+                                tooltip.className = 'card-tooltip';
+                                tooltip.innerHTML = `
+                                    <div class="tooltip-name">${card.name}</div>
+                                    <div class="tooltip-meta">ID: ${card.id}</div>
+                                    <div class="tooltip-meta">${card.stage}</div>
+                                `;
+                                
+                                wrapper.appendChild(img);
+                                wrapper.appendChild(badge);
+                                item.appendChild(wrapper);
+                                item.appendChild(tooltip);
+                                
+                                // Add click event to show modal
+                                item.addEventListener('click', () => {
+                                    openModal(card);
+                                });
+                                
+                                gridElement.appendChild(item);
+                            });
+                            viewerElement.style.display = 'block';
+                        }
+                    })
+                    .catch(err => console.error('Error loading deck details:', err));
+            }
+
+            // Simulate button click handler
+            btnSimulate.addEventListener('click', () => {
+                const deck1 = deck1Select.value;
+                const deck2 = deck2Select.value;
+
+                if (!deck1 || !deck2) return;
+
+                // Show loading state
+                btnSimulate.disabled = true;
+                statusContainer.style.display = 'flex';
+                errorMsg.style.display = 'none';
+
+                fetch('/api/simulate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ deck1, deck2 })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    btnSimulate.disabled = false;
+                    statusContainer.style.display = 'none';
+
+                    if (data.success && data.visualize) {
+                        // Open battle in heroz visualizer
+                        openVisualizer(data.visualize);
+                    } else {
+                        showError(data.error || 'An error occurred during simulation.');
+                    }
+                })
+                .catch(err => {
+                    btnSimulate.disabled = false;
+                    statusContainer.style.display = 'none';
+                    showError('Network error while simulating battle.');
+                    console.error(err);
+                });
+            });
+
+            function showError(msg) {
+                errorMsg.textContent = msg;
+                errorMsg.style.display = 'block';
+            }
+
+            function openVisualizer(visualizeData) {
+                const input = document.createElement("input");
+                input.type = "hidden";
+                input.name = "json";
+                input.value = JSON.stringify(visualizeData);
+
+                const form = document.createElement("form");
+                form.method = "POST";
+                form.action = "https://ptcgvis.heroz.jp/Visualizer/Replay/0";
+                form.target = "_blank";
+                form.appendChild(input);
+
+                document.body.appendChild(form);
+                form.submit();
+                document.body.removeChild(form);
+            }
+
+            // Modal overlay elements
+            const cardModal = document.getElementById('cardModal');
+            const modalImg = document.getElementById('modalImg');
+            const modalName = document.getElementById('modalName');
+            const modalMeta = document.getElementById('modalMeta');
+
+            function openModal(card) {
+                modalImg.src = `/static/card_images/${card.id}.png`;
+                modalImg.onerror = () => {
+                    modalImg.src = `https://placehold.co/250x350/1e293b/f8fafc?text=${encodeURIComponent(card.name)}`;
+                };
+                modalName.textContent = card.name;
+                modalMeta.textContent = `Card ID: ${card.id} | ${card.stage} | Type: ${card.type}`;
+                
+                cardModal.style.display = 'flex';
+                // Force layout reflow
+                cardModal.offsetHeight;
+                cardModal.classList.add('active');
+            }
+
+            function closeModal() {
+                cardModal.classList.remove('active');
+                setTimeout(() => {
+                    cardModal.style.display = 'none';
+                }, 300);
+            }
+
+            cardModal.addEventListener('click', (e) => {
+                if (e.target === cardModal) {
+                    closeModal();
+                }
+            });
+        });
+    </script>
+
+    <!-- Large Card Preview Modal -->
+    <div id="cardModal" class="modal-overlay">
+        <div class="modal-content">
+            <img id="modalImg" src="" alt="Large Card View">
+            <div class="modal-info">
+                <h2 id="modalName"></h2>
+                <p id="modalMeta"></p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
