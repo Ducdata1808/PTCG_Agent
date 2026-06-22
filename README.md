@@ -68,6 +68,7 @@ Next, validate the selected deck to ensure it complies with the competition cons
 ```bash
 python -m unittest tests/test_decks.py
 ```
+Meta decks: https://ptcg-kaggle-meta.vercel.app/2026-06-21
 
 ### Step 2: Collect Data & Train Networks
 Run the self-play match data collection and train the Value & Policy networks:
