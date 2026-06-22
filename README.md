@@ -122,12 +122,6 @@ python app.py
 ```
 Then, open **[http://127.0.0.1:5000](http://127.0.0.1:5000)** in your web browser.
 
-### Key Features
-* **Deck Visualizer**: Select any deck from the dropdown to instantly fetch its card list, copy counts, and high-quality image renders.
-* **Click-to-Zoom Modal**: Click on any card thumbnail in the deck grid to open a premium high-resolution modal zoom overlay with detailed metadata.
-* **Random Deck (Mystery Matchup)**: Choose **🎲 Random Deck** in the dropdown. The system renders an animated mystery placeholder card back and chooses a random competitive archetype from the 20+ decks on backend launch, keeping it hidden until the battle starts.
-* **Direct Battle Replay**: Clicking **Simulate Battle** runs the simulation locally on the CPU and immediately submits the visualizer replay data to the official PTCG Visualizer site.
-
 ---
 
 ## 🛠️ Debugging & Tracing Tools
