@@ -1,2 +1,5 @@
 numpy
 scikit-learn
+Flask
+kaggle-environments
+requests

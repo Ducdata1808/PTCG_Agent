@@ -27,6 +27,7 @@ ATTACK_DB = {a.attackId: a for a in all_attack()}
 # Time tracking global state
 GLOBAL_TIME_SPENT = 0.0
 PREV_TURN = -1
+DECK_LOAD_COUNT = 0
 
 
 def read_deck_csv(player_idx: int | None = None) -> list[int]:
@@ -44,6 +45,7 @@ def read_deck_csv(player_idx: int | None = None) -> list[int]:
             file_path = os.path.join(AGENT_DIR, "deck.csv")
         
     deck = []
+    print(f"[DEBUG_DECK] player_idx={player_idx} resolved file_path={file_path}", flush=True)
     with open(file_path, "r") as file:
         lines = file.read().split("\n")
         for line in lines[:60]:
@@ -443,8 +445,11 @@ def agent(obs_dict: dict) -> list[int]:
         GLOBAL_TIME_SPENT = 0.0
     PREV_TURN = current_turn
     
+    global DECK_LOAD_COUNT
     if obs.select is None:
-        return read_deck_csv()
+        DECK_LOAD_COUNT += 1
+        p_idx = 0 if DECK_LOAD_COUNT % 2 != 0 else 1
+        return read_deck_csv(p_idx)
 
     options = obs.select.option
     context = obs.select.context

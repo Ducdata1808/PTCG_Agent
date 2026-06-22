@@ -13,8 +13,14 @@ Or https://github.com/Ducdata1808/PTCG_Agent/tree/main/about_competition
 
 ```text
 PTCG_Agent/
+├── data/                      # External datasets and card images
+│   └── card_images/           # High-resolution PNG files for deck visualization
 ├── decks/                     # Meta-deck CSV layouts
 │   └── csv_file/              # Competitive archetype deck files (e.g. Alakazam.csv, Abomasnow.csv)
+├── static/                    # Dashboard static assets
+│   └── style.css              # Custom premium Glassmorphism layout styling
+├── templates/                 # Dashboard web templates
+│   └── index.html             # Main battle simulator frontend dashboard
 ├── submission/                # Final agent code & weights targeted for Kaggle submission
 │   ├── main.py                # Main submission agent entrypoint
 │   ├── deck.csv               # Currently active deck config
@@ -30,7 +36,9 @@ PTCG_Agent/
 │   ├── evaluate.py            # Local agent evaluation benchmark (V4 vs V1)
 │   └── evaluate_v4_vs_v2.py   # Head-to-head MCTS benchmark (V4 vs V2)
 ├── tests/                     # Verification test suites
+├── app.py                     # Flask web server for local dashboard simulation
 ├── manage_agent.py            # Unified pipeline manager CLI
+├── requirements.txt           # Python package dependencies
 ├── report.md                  # Development research findings and version summaries
 └── README.md                  # Project documentation & setup guide
 ```
@@ -95,6 +103,25 @@ tar -czf submission.tar.gz -C submission .
 ```
 
 Submit the resulting `submission.tar.gz` directly to Kaggle.
+
+---
+
+## 🖥️ Web Simulator Dashboard
+
+We provide an interactive local web portal to configure and test matchups between V4 agents using different meta-decks.
+
+### Running the Simulator Server
+To start the dashboard locally, run the Flask server:
+```bash
+python app.py
+```
+Then, open **[http://127.0.0.1:5000](http://127.0.0.1:5000)** in your web browser.
+
+### Key Features
+* **Deck Visualizer**: Select any deck from the dropdown to instantly fetch its card list, copy counts, and high-quality image renders.
+* **Click-to-Zoom Modal**: Click on any card thumbnail in the deck grid to open a premium high-resolution modal zoom overlay with detailed metadata.
+* **Random Deck (Mystery Matchup)**: Choose **🎲 Random Deck** in the dropdown. The system renders an animated mystery placeholder card back and chooses a random competitive archetype from the 20+ decks on backend launch, keeping it hidden until the battle starts.
+* **Direct Battle Replay**: Clicking **Simulate Battle** runs the simulation locally on the CPU and immediately submits the visualizer replay data to the official PTCG Visualizer site.
 
 ---
 
