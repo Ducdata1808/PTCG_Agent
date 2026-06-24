@@ -400,4 +400,4 @@ Over **10 games** using the Hop Trevenant deck:
   * **V2 Agent**: Avg = **299.84 ms**, Max = **867.65 ms**
 
  ## 7.4 Result on Kaggle
- 
+ - 20000 training matches: win 39/78 matches, score 600 - 740, final score 706
