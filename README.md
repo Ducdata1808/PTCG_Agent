@@ -108,7 +108,6 @@ To submit your agent to Kaggle, you need a compressed tarball containing the cod
 tar -czf submission.tar.gz -C submission .
 ```
 
-Submit the resulting `submission.tar.gz` directly to Kaggle.
 
 ---
 
