@@ -351,7 +351,7 @@ The results showed that **increasing the training matches beyond 20,000 is unnec
 3. **Conclusion:** A budget of **20,000 matches** represents the optimal sweet spot for deck-specific tuning, providing maximum targeted performance with significantly shorter training times (~3 hours vs ~7.5 hours).
 
 ## 6.6 Result on Kaggle
-- 20000 training matches: win 22/47 matches, score 518 - 773, final score 646
+- 20000 training matches: win 22/47 matches, score 520 - 760, final score 646
 - 50000 training mtaches: win 11/25 matches, score 487 - 678, final score 526
 
 
