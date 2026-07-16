@@ -143,4 +143,4 @@ python scripts/find_losing_trace.py
 ---
 
 ## 📖 AI Agent Development Progression
-For detailed research findings, performance metrics, and win-rate logs across all versions, see the [report.md](report.md).
+For detailed research findings, see the [report.md](report.md).
